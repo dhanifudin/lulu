@@ -33,37 +33,37 @@
 
         <template v-if="store.subscribed">
           <!-- Night before -->
-          <div class="space-y-1">
+          <div class="space-y-2">
             <label class="flex items-center gap-3 cursor-pointer py-1">
               <input type="checkbox" v-model="nightEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.nightLabel') }}</span>
             </label>
-            <input v-if="nightEnabled" type="time" v-model="nightTime"
-                   class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-full" />
+            <input v-if="nightEnabled" type="time" v-model="nightTime" class="input" />
           </div>
 
           <!-- Morning -->
-          <div class="space-y-1">
+          <div class="space-y-2">
             <label class="flex items-center gap-3 cursor-pointer py-1">
               <input type="checkbox" v-model="morningEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.morningLabel') }}</span>
             </label>
-            <input v-if="morningEnabled" type="time" v-model="morningTime"
-                   class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-full" />
+            <input v-if="morningEnabled" type="time" v-model="morningTime" class="input" />
           </div>
 
           <!-- Pickup reminder -->
-          <div class="space-y-1">
+          <div class="space-y-2">
             <label class="flex items-center gap-3 cursor-pointer py-1">
               <input type="checkbox" v-model="pickupEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.pickupLabel') }}</span>
             </label>
-            <div v-if="pickupEnabled" class="flex items-center gap-2">
-              <input type="number" v-model.number="pickupMinutes" min="5" max="120"
-                     class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-20 text-center" />
+            <!-- −/+ stepper for pickup minutes -->
+            <div v-if="pickupEnabled" class="flex items-center gap-3">
+              <button @click="pickupMinutes = Math.max(5, pickupMinutes - 5)" class="stepper-btn">−</button>
+              <span class="font-display font-bold text-plum-700 text-lg w-10 text-center">{{ pickupMinutes }}</span>
+              <button @click="pickupMinutes = Math.min(120, pickupMinutes + 5)" class="stepper-btn">＋</button>
               <span class="text-sm text-plum-700/60">{{ t('notifications.pickupMinutes') }}</span>
             </div>
           </div>

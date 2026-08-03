@@ -1,8 +1,7 @@
 <template>
   <div class="min-h-screen bg-cream">
     <!-- Header -->
-    <PageHeader>
-      <h1 class="font-display font-bold text-plum-700 text-2xl">{{ t('calendar.title') }}</h1>
+    <AppHeader :title="t('calendar.title')">
       <p class="text-sm text-plum-700/60 mt-0.5">{{ t('calendar.subtitle') }}</p>
 
       <!-- Month navigation -->
@@ -13,7 +12,7 @@
         </span>
         <button @click="nextMonth" class="btn-secondary px-4 py-2 text-sm">›</button>
       </div>
-    </PageHeader>
+    </AppHeader>
 
     <div class="page pt-4 pb-6">
       <!-- Day-of-week headers -->
@@ -86,7 +85,7 @@ import { useI18n } from 'vue-i18n'
 import { useCalendarStore, EVENT_COLORS, EVENT_EMOJI } from '@/stores/calendar'
 import type { EventType } from '@/stores/calendar'
 import { nowWIB, todayWIB } from '@/lib/time'
-import PageHeader from '@/components/PageHeader.vue'
+import AppHeader from '@/components/AppHeader.vue'
 
 const { t, tm } = useI18n()
 const cal        = useCalendarStore()

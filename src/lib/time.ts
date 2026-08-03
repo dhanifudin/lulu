@@ -46,6 +46,11 @@ export function formatDate(date: Date, lang: string): string {
   return format(toZonedTime(date, TZ), 'd MMMM yyyy', { locale: lang === 'en' ? enUS : localeId })
 }
 
+/** Human-friendly long date: "Senin, 3 Agustus 2026" / "Monday, 3 August 2026" */
+export function formatLongDate(date: Date, lang: string): string {
+  return format(toZonedTime(date, TZ), 'EEEE, d MMMM yyyy', { locale: lang === 'en' ? enUS : localeId })
+}
+
 /** Current time as HH:mm in WIB */
 export function currentTimeWIB(): string {
   return format(nowWIB(), 'HH:mm')

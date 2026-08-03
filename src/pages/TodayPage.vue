@@ -1,32 +1,6 @@
 <template>
   <div class="min-h-screen bg-cream">
-    <!-- Hero header -->
-    <PageHeader>
-      <!-- Row 1: avatar + greeting + actions -->
-      <div class="flex items-center gap-3 mb-2">
-        <img v-if="auth.userAvatar" :src="auth.userAvatar"
-             class="w-10 h-10 rounded-full border-2 border-pink-300 flex-shrink-0" />
-        <div class="flex-1 min-w-0">
-          <p class="text-xs text-plum-700/60">{{ t('home.greeting', { name: firstName }) }}</p>
-          <h1 class="font-display font-bold text-plum-700 text-xl leading-tight">
-            {{ isWeekend ? t('home.weekend') : isHoliday ? t('home.holiday') : t('home.today') }}
-          </h1>
-        </div>
-        <!-- Lang toggle + sign-out -->
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <LangToggle />
-          <button @click="auth.signOut()"
-                  class="text-xs font-semibold bg-white/60 hover:bg-pink-50 text-plum-700/50 hover:text-pink-500 rounded-xl px-3 py-2 transition-all active:scale-95 border border-pink-100">
-            {{ t('common.signOut') }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Date + live clock -->
-      <p class="text-sm font-semibold text-pink-500 mb-2">
-        📅 {{ localizedDay }}, {{ localizedDate }} · {{ currentTimeDisplay }}
-      </p>
-
+    <AppHeader :title="isWeekend ? t('home.weekend') : isHoliday ? t('home.holiday') : t('home.today')">
       <!-- Today's uniform -->
       <div v-if="!isWeekend && !isHoliday && schedule.todayUniform" class="mb-2">
         <p class="text-xs text-plum-700/50 mb-1">{{ t('home.uniform') }}</p>
@@ -40,7 +14,7 @@
           🌸 {{ e.title }}
         </div>
       </div>
-    </PageHeader>
+    </AppHeader>
 
     <div class="page space-y-5 py-4">
 
@@ -99,13 +73,12 @@ import { useAuthStore }     from '@/stores/auth'
 import { useScheduleStore } from '@/stores/schedule'
 import { useHabitsStore }   from '@/stores/habits'
 import { useCalendarStore, EVENT_EMOJI, EVENT_COLORS } from '@/stores/calendar'
-import { nowWIB, todayWIB, dayOfWeekWIB, formatDay, formatDate, currentTimeWIB } from '@/lib/time'
+import { nowWIB, todayWIB, dayOfWeekWIB } from '@/lib/time'
+import AppHeader     from '@/components/AppHeader.vue'
 import UniformBadge  from '@/components/UniformBadge.vue'
 import ConfettiBlast from '@/components/ConfettiBlast.vue'
-import PageHeader    from '@/components/PageHeader.vue'
-import LangToggle    from '@/components/LangToggle.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const auth     = useAuthStore()
 const schedule = useScheduleStore()
@@ -116,20 +89,10 @@ const now   = nowWIB()
 const today = todayWIB()
 const dow   = dayOfWeekWIB()   // 1=Mon … 7=Sun
 
-// Localized date strings (reactive to locale changes)
-const localizedDay  = computed(() => formatDay(now, locale.value))
-const localizedDate = computed(() => formatDate(now, locale.value))
-
 // State flags
 const isWeekend     = computed(() => dow >= 6)
 const holidayEvents = computed(() => cal.eventsForDate(today).filter(e => e.type === 'holiday'))
 const isHoliday     = computed(() => holidayEvents.value.length > 0)
-
-const firstName = computed(() => auth.userName.split(' ')[0])
-
-// Live clock (refreshes every 30 s)
-const currentTimeDisplay = ref(currentTimeWIB())
-setInterval(() => { currentTimeDisplay.value = currentTimeWIB() }, 30_000)
 
 // ── KPI ──────────────────────────────────────────────────────────
 const doneCount  = computed(() =>

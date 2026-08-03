@@ -1,10 +1,9 @@
 <template>
   <div class="min-h-screen bg-cream">
     <!-- Header -->
-    <PageHeader>
-      <h1 class="font-display font-bold text-plum-700 text-2xl">{{ t('schedule.title') }}</h1>
+    <AppHeader :title="t('schedule.title')">
       <p class="text-sm text-plum-700/60 mt-0.5">{{ t('schedule.subtitle') }}</p>
-    </PageHeader>
+    </AppHeader>
 
     <!-- Day tabs -->
     <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100">
@@ -57,7 +56,7 @@ import { useScheduleStore } from '@/stores/schedule'
 import { dayOfWeekWIB } from '@/lib/time'
 import SubjectCard  from '@/components/SubjectCard.vue'
 import UniformBadge from '@/components/UniformBadge.vue'
-import PageHeader   from '@/components/PageHeader.vue'
+import AppHeader    from '@/components/AppHeader.vue'
 
 const { t, tm } = useI18n()
 const schedule  = useScheduleStore()
