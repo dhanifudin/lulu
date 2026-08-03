@@ -10,6 +10,9 @@ export interface Habit {
   emoji: string
   sort_order: number
   active: boolean
+  start_time: string | null   // HH:MM:SS from DB, or null
+  end_time: string | null
+  prayer_key: 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha' | null
 }
 
 export interface HabitLog {
@@ -96,7 +99,7 @@ export const useHabitsStore = defineStore('habits', () => {
   }
 
   /** Add a new habit */
-  async function addHabit(habit: Omit<Habit, 'id' | 'sort_order' | 'active'>) {
+  async function addHabit(habit: Omit<Habit, 'id' | 'sort_order' | 'active' | 'prayer_key'>) {
     const maxOrder = habits.value.reduce((m, h) => Math.max(m, h.sort_order), 0)
     const { data } = await supabase
       .from('habits')

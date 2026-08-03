@@ -17,6 +17,6 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "env.d.ts"],
-  "exclude": ["node_modules", "supabase/functions"],
+  "exclude": ["node_modules", "supabase/functions", "src/sw.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

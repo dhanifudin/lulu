@@ -17,6 +17,8 @@
       <p class="font-display font-bold text-plum-700 text-base leading-tight">
         {{ habit.emoji }} {{ displayName }}
       </p>
+      <!-- Time window -->
+      <p v-if="timeLabel" class="text-xs text-plum-700/45 mt-0.5">🕐 {{ timeLabel }}</p>
 
       <!-- Week grid: last 7 days -->
       <div class="flex gap-1 mt-2">
@@ -54,6 +56,8 @@ const props = defineProps<{
   stars: number
   currentStreak: number
   weekGrid: boolean[]
+  /** Formatted time label, e.g. "04:32" or "06:00–06:10". Null = no display. */
+  timeLabel?: string | null
 }>()
 
 const emit = defineEmits<{ toggle: [id: string] }>()

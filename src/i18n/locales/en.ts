@@ -57,11 +57,19 @@ export default {
     namePlaceholder: 'Name (Indonesian)',
     nameEnPlaceholder: 'Name (English)',
     emojiPlaceholder: 'Emoji (e.g. 🏃)',
+    startTimePlaceholder: 'Start time (optional)',
+    endTimePlaceholder: 'End time (optional)',
     addBtn: 'Add ➕',
     streakDays: '🔥 {n} days',
     markDone: 'Done {name}',
     markUndone: 'Undo {name}',
     noHabits: 'No active habits 😊',
+    groups: {
+      morning:   '🌅 Morning',
+      afternoon: '☀️ Afternoon',
+      evening:   '🌙 Evening',
+      chores:    '🧹 Chores',
+    },
   },
   calendar: {
     title: '🌸 Calendar',
@@ -96,6 +104,8 @@ export default {
     activeLabel: 'Notifications Active',
     nightLabel: '🌙 Evening Reminder (prepare books)',
     morningLabel: '☀️ Morning Reminder (today\'s schedule)',
+    pickupLabel: '🚗 Pickup Reminder (before school ends)',
+    pickupMinutes: 'minutes before',
     save: 'Save ✓',
   },
 }

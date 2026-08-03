@@ -29,6 +29,10 @@ export default defineConfig({
   plugins: [
     vue(),
     VitePWA({
+      // Custom SW so we can handle Web Push (generateSW has no push handler)
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'favicon-32.png', 'icon.svg', 'flower-192.png', 'flower-512.png', 'apple-touch-icon.png'],
       manifest: {
@@ -47,13 +51,12 @@ export default defineConfig({
           { src: 'apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
         ],
       },
-      workbox: {
+      injectManifest: {
+        // Glob patterns for assets to precache (navigation fallback handled in src/sw.ts)
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/],
       },
       // Enable SW in dev so Chrome shows "Install app" on localhost too.
-      // Use type:'module' to match Vite's ESM dev server.
+      // type:'module' required because src/sw.ts uses ES imports.
       devOptions: {
         enabled: true,
         type: 'module',

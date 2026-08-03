@@ -7,9 +7,11 @@ export interface NotifPrefs {
   id?: string
   user_id?: string
   night_before_enabled: boolean
-  night_before_time: string   // HH:mm WIB
+  night_before_time: string       // HH:mm WIB
   morning_enabled: boolean
-  morning_time: string        // HH:mm WIB
+  morning_time: string            // HH:mm WIB
+  pickup_enabled: boolean
+  pickup_minutes_before: number   // default 30
 }
 
 const DEFAULT_PREFS: NotifPrefs = {
@@ -17,6 +19,8 @@ const DEFAULT_PREFS: NotifPrefs = {
   night_before_time: '19:00',
   morning_enabled: true,
   morning_time: '05:30',
+  pickup_enabled: true,
+  pickup_minutes_before: 30,
 }
 
 export const useNotificationsStore = defineStore('notifications', () => {

@@ -4,9 +4,10 @@
  * Called by two pg_cron schedules:
  *   🌙 Night before:   12:00 UTC (19:00 WIB)
  *   ☀️ Early morning: 22:30 UTC prev day (05:30 WIB)
+ *   🚗 Pickup:         varies per day (30 min before last slot ends)
  *
  * Algorithm:
- *  1. Determine which reminder type this is (from query param ?type=night|morning)
+ *  1. Determine which reminder type this is (from query param ?type=night|morning|pickup)
  *  2. Figure out the target school day (WIB)
  *  3. Load that day's schedule slots + uniforms from lulu schema
  *  4. Check calendar_events — skip if target day is a holiday/weekend
@@ -48,7 +49,7 @@ const DOW_ID = ['', 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu']
 
 Deno.serve(async (req: Request) => {
   const url    = new URL(req.url)
-  const type   = url.searchParams.get('type') ?? 'night'  // 'night' | 'morning'
+  const type   = url.searchParams.get('type') ?? 'night'  // 'night' | 'morning' | 'pickup'
 
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, { db: { schema: 'lulu' } })
 
@@ -60,7 +61,7 @@ Deno.serve(async (req: Request) => {
     // Night: remind about TOMORROW
     targetDate = new Date(wibNow.getTime() + 24 * 60 * 60 * 1000)
   } else {
-    // Morning: remind about TODAY
+    // Morning & pickup: remind about TODAY
     targetDate = wibNow
   }
 
@@ -87,7 +88,7 @@ Deno.serve(async (req: Request) => {
   // Load schedule for target day (non-break/prayer academic subjects only)
   const { data: slots } = await supabase
     .from('schedule_slots')
-    .select('subject_key, label, start_time')
+    .select('subject_key, label, start_time, end_time')
     .eq('day_of_week', targetDow)
     .order('start_time')
 
@@ -114,6 +115,9 @@ Deno.serve(async (req: Request) => {
     if (!firstStart) firstStart = slot.start_time
   }
 
+  // Build subject string for use in night/morning message bodies
+  const subjectStr = subjectList.join(', ')
+
   // Load uniform for target day
   const { data: uniformData } = await supabase
     .from('uniforms')
@@ -125,12 +129,20 @@ Deno.serve(async (req: Request) => {
 
   // Build message
   const dowId = DOW_ID[targetDow]
-  const subjectStr = subjectList.slice(0, 5).join(', ') + (subjectList.length > 5 ? '…' : '')
 
   let title: string
   let body: string
 
-  if (type === 'night') {
+  if (type === 'pickup') {
+    // Pickup: find the last slot end time for today
+    let lastEnd = ''
+    for (const slot of (slots ?? [])) {
+      if (slot.end_time) lastEnd = slot.end_time
+    }
+    const endTimeStr = lastEnd ? lastEnd.slice(0, 5) : '--:--'
+    title = `🚗 Waktunya jemput! ${dowId}`
+    body  = `Sekolah selesai jam ${endTimeStr}. ${uniformStr}`
+  } else if (type === 'night') {
     title = `🎒 Siapkan untuk besok, ${dowId}!`
     body  = `Mata pelajaran: ${subjectStr}. ${uniformStr}`
   } else {
@@ -141,9 +153,9 @@ Deno.serve(async (req: Request) => {
   const payload = JSON.stringify({
     title,
     body,
-    icon:  '/lulu/flower-192.png',
-    badge: '/lulu/flower-192.png',
-    url:   '/lulu/#/',
+    icon:  '/flower-192.png',
+    badge: '/flower-192.png',
+    url:   '/',
     tag:   `lulu-${type}`,
   })
 
@@ -154,9 +166,9 @@ Deno.serve(async (req: Request) => {
 
   const { data: prefs } = await supabase
     .from('notification_prefs')
-    .select('user_id, night_before_enabled, morning_enabled')
+    .select('user_id, night_before_enabled, morning_enabled, pickup_enabled')
 
-  const prefsMap = new Map((prefs ?? []).map((p: { user_id: string; night_before_enabled: boolean; morning_enabled: boolean }) => [p.user_id, p]))
+  const prefsMap = new Map((prefs ?? []).map((p: { user_id: string; night_before_enabled: boolean; morning_enabled: boolean; pickup_enabled: boolean }) => [p.user_id, p]))
 
   const staleIds: string[] = []
   let sent = 0
@@ -166,7 +178,9 @@ Deno.serve(async (req: Request) => {
     // Default: enabled if no prefs row
     const enabled = type === 'night'
       ? (p?.night_before_enabled ?? true)
-      : (p?.morning_enabled ?? true)
+      : type === 'morning'
+        ? (p?.morning_enabled ?? true)
+        : (p?.pickup_enabled ?? true)
     if (!enabled) continue
 
     try {

@@ -57,11 +57,19 @@ export default {
     namePlaceholder: 'Nama (Indonesia)',
     nameEnPlaceholder: 'Name (English)',
     emojiPlaceholder: 'Emoji (misal 🏃)',
+    startTimePlaceholder: 'Mulai (opsional)',
+    endTimePlaceholder: 'Selesai (opsional)',
     addBtn: 'Tambah ➕',
     streakDays: '🔥 {n} hari',
     markDone: 'Selesai {name}',
     markUndone: 'Batal {name}',
     noHabits: 'Tidak ada kebiasaan aktif 😊',
+    groups: {
+      morning:   '🌅 Pagi',
+      afternoon: '☀️ Siang',
+      evening:   '🌙 Malam',
+      chores:    '🧹 Tugas',
+    },
   },
   calendar: {
     title: '🌸 Kalender',
@@ -96,6 +104,8 @@ export default {
     activeLabel: 'Notifikasi Aktif',
     nightLabel: '🌙 Pengingat Malam (siapkan buku)',
     morningLabel: '☀️ Pengingat Pagi (jadwal hari ini)',
+    pickupLabel: '🚗 Pengingat Jemput (sebelum pulang)',
+    pickupMinutes: 'menit sebelumnya',
     save: 'Simpan ✓',
   },
 }

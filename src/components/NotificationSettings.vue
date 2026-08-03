@@ -54,6 +54,20 @@
                    class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-full" />
           </div>
 
+          <!-- Pickup reminder -->
+          <div class="space-y-1">
+            <label class="flex items-center gap-3 cursor-pointer py-1">
+              <input type="checkbox" v-model="pickupEnabled"
+                     class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
+              <span class="text-sm font-semibold text-plum-700">{{ t('notifications.pickupLabel') }}</span>
+            </label>
+            <div v-if="pickupEnabled" class="flex items-center gap-2">
+              <input type="number" v-model.number="pickupMinutes" min="5" max="120"
+                     class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-20 text-center" />
+              <span class="text-sm text-plum-700/60">{{ t('notifications.pickupMinutes') }}</span>
+            </div>
+          </div>
+
           <button @click="save" class="btn-secondary w-full">{{ t('notifications.save') }}</button>
         </template>
       </template>
@@ -73,6 +87,8 @@ const nightEnabled   = ref(store.prefs.night_before_enabled)
 const nightTime      = ref(store.prefs.night_before_time)
 const morningEnabled = ref(store.prefs.morning_enabled)
 const morningTime    = ref(store.prefs.morning_time)
+const pickupEnabled  = ref(store.prefs.pickup_enabled)
+const pickupMinutes  = ref(store.prefs.pickup_minutes_before)
 
 onMounted(async () => {
   await store.fetchPrefs()
@@ -81,6 +97,8 @@ onMounted(async () => {
   nightTime.value      = store.prefs.night_before_time
   morningEnabled.value = store.prefs.morning_enabled
   morningTime.value    = store.prefs.morning_time
+  pickupEnabled.value  = store.prefs.pickup_enabled
+  pickupMinutes.value  = store.prefs.pickup_minutes_before
 })
 
 async function requestAndSubscribe() {
@@ -99,6 +117,8 @@ async function save() {
     night_before_time:    nightTime.value,
     morning_enabled:      morningEnabled.value,
     morning_time:         morningTime.value,
+    pickup_enabled:       pickupEnabled.value,
+    pickup_minutes_before: pickupMinutes.value,
   })
 }
 </script>
