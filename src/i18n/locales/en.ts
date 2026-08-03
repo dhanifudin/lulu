@@ -107,5 +107,10 @@ export default {
     pickupLabel: '🚗 Pickup Reminder (before school ends)',
     pickupMinutes: 'minutes before',
     save: 'Save ✓',
+    testBtn: 'Test Notification 🔔',
+    testTitle: '🌸 Lulu · Test Notification',
+    testBody: 'Notifications are working! ✓',
+    testSuccess: 'Notification sent! ✓',
+    testFail: 'Failed to send notification ✗',
   },
 }

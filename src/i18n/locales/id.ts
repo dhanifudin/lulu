@@ -107,5 +107,10 @@ export default {
     pickupLabel: '🚗 Pengingat Jemput (sebelum pulang)',
     pickupMinutes: 'menit sebelumnya',
     save: 'Simpan ✓',
+    testBtn: 'Coba Notifikasi 🔔',
+    testTitle: '🌸 Lulu · Tes Notifikasi',
+    testBody: 'Notifikasi berfungsi dengan baik! ✓',
+    testSuccess: 'Berhasil! Periksa notifikasimu ✓',
+    testFail: 'Gagal mengirim notifikasi ✗',
   },
 }

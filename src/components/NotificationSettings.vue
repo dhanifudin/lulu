@@ -69,6 +69,14 @@
           </div>
 
           <button @click="save" class="btn-secondary w-full">{{ t('notifications.save') }}</button>
+
+          <!-- Test button -->
+          <button @click="sendTest" :disabled="testing"
+                  class="w-full flex items-center justify-center gap-2 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-600 font-semibold text-sm py-2.5 transition-all active:scale-95 disabled:opacity-50">
+            <span v-if="testing" class="text-base animate-spin">🌸</span>
+            <span v-else class="text-base">🔔</span>
+            {{ testLabel }}
+          </button>
         </template>
       </template>
     </template>
@@ -82,6 +90,31 @@ import { useNotificationsStore } from '@/stores/notifications'
 
 const { t }  = useI18n()
 const store  = useNotificationsStore()
+
+// Test notification state
+const testing   = ref(false)
+const testLabel = ref(t('notifications.testBtn'))
+
+async function sendTest() {
+  testing.value   = true
+  testLabel.value = t('notifications.testBtn')
+  try {
+    const reg = await navigator.serviceWorker.ready
+    await reg.showNotification(t('notifications.testTitle'), {
+      body:  t('notifications.testBody'),
+      icon:  '/flower-192.png',
+      badge: '/flower-192.png',
+      tag:   'lulu-test',
+      data:  { url: '/' },
+    })
+    testLabel.value = t('notifications.testSuccess')
+  } catch {
+    testLabel.value = t('notifications.testFail')
+  } finally {
+    testing.value = false
+    setTimeout(() => { testLabel.value = t('notifications.testBtn') }, 3000)
+  }
+}
 
 const nightEnabled   = ref(store.prefs.night_before_enabled)
 const nightTime      = ref(store.prefs.night_before_time)
