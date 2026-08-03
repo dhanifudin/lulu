@@ -32,10 +32,22 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { watch } from 'vue'
+import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import BottomNav from '@/components/BottomNav.vue'
 
 // auth.init() is called in main.ts before mount — no need to call it here.
 const auth = useAuthStore()
+const route = useRoute()
+const router = useRouter()
+
+// After PKCE code exchange, onAuthStateChange fires AFTER the router has
+// already sent the unauthenticated user to #/login. Watch isLoggedIn so
+// we navigate away as soon as the session is confirmed.
+watch(() => auth.isLoggedIn, (loggedIn) => {
+  if (loggedIn && route.name === 'login') {
+    router.replace({ name: 'today' })
+  }
+})
 </script>
