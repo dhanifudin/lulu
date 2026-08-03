@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+*.local
+
+# graphify outputs (keep GRAPH_REPORT.md, skip heavy files)
+graphify-out/graph.html
+graphify-out/cache/
+graphify-out/*.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase
+.supabase/
+supabase/.temp/
+supabase/.env.functions   # actual secrets (keep the .example)
