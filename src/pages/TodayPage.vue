@@ -1,17 +1,18 @@
 <template>
-  <div class="min-h-screen bg-cream pb-4">
+  <div class="min-h-screen bg-cream">
     <!-- Hero header -->
-    <div class="flower-bg bg-gradient-to-b from-pink-100 to-cream px-6 pt-8 pb-6">
+    <PageHeader>
       <!-- Avatar + greeting -->
-      <div class="flex items-center gap-3 mb-4">
-        <img v-if="auth.userAvatar" :src="auth.userAvatar" class="w-10 h-10 rounded-full border-2 border-pink-300" />
+      <div class="flex items-center gap-3 mb-3">
+        <img v-if="auth.userAvatar" :src="auth.userAvatar" class="w-10 h-10 rounded-full border-2 border-pink-300 flex-shrink-0" />
         <div class="flex-1 min-w-0">
           <p class="text-xs text-plum-700/60">Halo, {{ firstName }}! 👋</p>
           <h1 class="font-display font-bold text-plum-700 text-2xl leading-tight">
             {{ isWeekend ? 'Selamat libur! 🌸' : isHoliday ? '🌸 Hari libur!' : 'Hari ini 🌸' }}
           </h1>
         </div>
-        <button @click="auth.signOut()" class="text-plum-700/30 hover:text-pink-400 text-sm p-2">
+        <button @click="auth.signOut()"
+                class="flex-shrink-0 text-xs font-semibold bg-white/60 hover:bg-pink-50 text-plum-700/50 hover:text-pink-500 rounded-xl px-3 py-2 transition-all active:scale-95 border border-pink-100">
           Keluar
         </button>
       </div>
@@ -34,9 +35,9 @@
           🌸 {{ e.title }}
         </div>
       </div>
-    </div>
+    </PageHeader>
 
-    <div class="px-4 space-y-4 mt-2">
+    <div class="page space-y-4 py-4">
       <!-- Weekend / holiday state -->
       <div v-if="isWeekend || isHoliday" class="card text-center py-8">
         <div class="text-6xl mb-3">🌺</div>
@@ -118,6 +119,7 @@ import SubjectCard    from '@/components/SubjectCard.vue'
 import HabitCard      from '@/components/HabitCard.vue'
 import UniformBadge   from '@/components/UniformBadge.vue'
 import ConfettiBlast  from '@/components/ConfettiBlast.vue'
+import PageHeader     from '@/components/PageHeader.vue'
 
 const auth     = useAuthStore()
 const schedule = useScheduleStore()

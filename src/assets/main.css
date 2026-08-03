@@ -58,6 +58,20 @@
   }
 }
 
+/* Page content wrapper — max width + consistent padding */
+.page {
+  @apply max-w-lg mx-auto px-5;
+}
+
+/* Hide scrollbars (horizontal day-tab strip in SchedulePage) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Scrollbar (webkit) */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -17,7 +17,7 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'flower-192.png', 'flower-512.png'],
+      includeAssets: ['favicon.svg', 'favicon-32.png', 'icon.svg', 'flower-192.png', 'flower-512.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Lulu 🌸 Jadwal & Kebiasaan',
         short_name: 'Lulu',
@@ -30,6 +30,7 @@ export default defineConfig({
         icons: [
           { src: 'flower-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'flower-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: 'apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
         ],
       },
       workbox: {

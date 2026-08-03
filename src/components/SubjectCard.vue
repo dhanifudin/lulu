@@ -8,7 +8,7 @@
     <!-- Time -->
     <div class="flex-shrink-0 text-right min-w-[52px]">
       <p class="text-xs font-semibold text-plum-700/60 leading-none">{{ slot.start_time }}</p>
-      <p class="text-[10px] text-plum-700/40 mt-0.5">{{ slot.end_time }}</p>
+      <p class="text-xs text-plum-700/40 mt-0.5">{{ slot.end_time }}</p>
     </div>
 
     <!-- Divider dot -->

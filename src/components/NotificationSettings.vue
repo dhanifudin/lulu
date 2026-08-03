@@ -24,35 +24,37 @@
         <!-- Subscribe toggle -->
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-plum-700">Notifikasi Aktif</span>
+          <!-- Toggle: min 44px tap area via padding -->
           <button @click="toggleSubscription"
-                  class="relative w-12 h-6 rounded-full transition-colors duration-200"
-                  :class="store.subscribed ? 'bg-pink-300' : 'bg-gray-200'">
-            <span class="absolute top-0.5 h-5 w-5 bg-white rounded-full shadow transition-transform duration-200"
-                  :class="store.subscribed ? 'translate-x-6' : 'translate-x-0.5'" />
+                  class="relative w-14 h-8 rounded-full transition-colors duration-200 flex-shrink-0"
+                  :class="store.subscribed ? 'bg-pink-300' : 'bg-gray-200'"
+                  style="min-width: 56px; min-height: 32px;">
+            <span class="absolute top-1 h-6 w-6 bg-white rounded-full shadow transition-transform duration-200"
+                  :class="store.subscribed ? 'translate-x-7' : 'translate-x-1'" />
           </button>
         </div>
 
         <template v-if="store.subscribed">
           <!-- Night before -->
           <div class="space-y-1">
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="flex items-center gap-3 cursor-pointer py-1">
               <input type="checkbox" v-model="nightEnabled"
-                     class="rounded accent-pink-400" />
+                     class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">🌙 Pengingat Malam (siapkan buku)</span>
             </label>
             <input v-if="nightEnabled" type="time" v-model="nightTime"
-                   class="text-sm border border-pink-200 rounded-xl px-3 py-1.5 w-full" />
+                   class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-full" />
           </div>
 
           <!-- Morning -->
           <div class="space-y-1">
-            <label class="flex items-center gap-2 cursor-pointer">
+            <label class="flex items-center gap-3 cursor-pointer py-1">
               <input type="checkbox" v-model="morningEnabled"
-                     class="rounded accent-pink-400" />
+                     class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">☀️ Pengingat Pagi (jadwal hari ini)</span>
             </label>
             <input v-if="morningEnabled" type="time" v-model="morningTime"
-                   class="text-sm border border-pink-200 rounded-xl px-3 py-1.5 w-full" />
+                   class="text-sm border border-pink-200 rounded-xl px-3 py-2.5 w-full" />
           </div>
 
           <button @click="save" class="btn-secondary w-full">Simpan ✓</button>

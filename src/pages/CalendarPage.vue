@@ -1,9 +1,9 @@
 <template>
   <div class="min-h-screen bg-cream">
     <!-- Header -->
-    <div class="flower-bg bg-gradient-to-b from-pink-100 to-cream px-6 pt-8 pb-4">
+    <PageHeader>
       <h1 class="font-display font-bold text-plum-700 text-2xl">🌸 Kalender</h1>
-      <p class="text-sm text-plum-700/60">Tahun Ajaran 2026 / 2027</p>
+      <p class="text-sm text-plum-700/60 mt-0.5">Tahun Ajaran 2026 / 2027</p>
 
       <!-- Month navigation -->
       <div class="flex items-center justify-between mt-3">
@@ -13,9 +13,9 @@
         </span>
         <button @click="nextMonth" class="btn-secondary px-4 py-2 text-sm">›</button>
       </div>
-    </div>
+    </PageHeader>
 
-    <div class="px-4 pt-4 pb-6">
+    <div class="page pt-4 pb-6">
       <!-- Day-of-week headers -->
       <div class="grid grid-cols-7 mb-2">
         <div v-for="d in DOW_LABELS" :key="d"
@@ -85,6 +85,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useCalendarStore, EVENT_COLORS, EVENT_EMOJI } from '@/stores/calendar'
 import type { EventType } from '@/stores/calendar'
 import { nowWIB, todayWIB } from '@/lib/time'
+import PageHeader from '@/components/PageHeader.vue'
 
 const cal  = useCalendarStore()
 const now  = nowWIB()

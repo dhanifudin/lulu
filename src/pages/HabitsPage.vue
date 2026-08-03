@@ -1,28 +1,28 @@
 <template>
   <div class="min-h-screen bg-cream">
     <!-- Header -->
-    <div class="flower-bg bg-gradient-to-b from-pink-100 to-cream px-6 pt-8 pb-4">
+    <PageHeader>
       <h1 class="font-display font-bold text-plum-700 text-2xl">⭐ Kebiasaan Baik</h1>
-      <p class="text-sm text-plum-700/60">Good Habits · {{ todayStr }}</p>
+      <p class="text-sm text-plum-700/60 mt-0.5">Good Habits · {{ todayStr }}</p>
 
-      <!-- Summary -->
-      <div class="mt-3 flex gap-3">
+      <!-- Summary stat cards -->
+      <div class="mt-3 flex gap-2">
         <div class="card-pink flex-1 text-center py-2">
           <p class="font-display font-bold text-pink-500 text-2xl">{{ doneCount }}/{{ habits.habits.length }}</p>
-          <p class="text-xs text-plum-700/60">Selesai hari ini</p>
+          <p class="text-[11px] text-plum-700/60 leading-tight mt-0.5">Selesai<br>hari ini</p>
         </div>
         <div class="card-pink flex-1 text-center py-2">
           <p class="font-display font-bold text-orange-400 text-2xl">🔥 {{ maxStreak }}</p>
-          <p class="text-xs text-plum-700/60">Streak terpanjang</p>
+          <p class="text-[11px] text-plum-700/60 leading-tight mt-0.5">Streak<br>terpanjang</p>
         </div>
         <div class="card-pink flex-1 text-center py-2">
           <p class="font-display font-bold text-pink-400 text-2xl">⭐ {{ totalStars }}</p>
-          <p class="text-xs text-plum-700/60">Total bintang</p>
+          <p class="text-[11px] text-plum-700/60 leading-tight mt-0.5">Total<br>bintang</p>
         </div>
       </div>
-    </div>
+    </PageHeader>
 
-    <div class="px-4 pt-4 space-y-4">
+    <div class="page pt-4 space-y-4 pb-6">
       <!-- Loading -->
       <div v-if="habits.loading" class="text-center py-12 text-3xl text-pink-300">🌸</div>
 
@@ -65,9 +65,10 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useHabitsStore } from '@/stores/habits'
 import { todayWIB, formatDateId, nowWIB } from '@/lib/time'
-import HabitCard           from '@/components/HabitCard.vue'
-import ConfettiBlast       from '@/components/ConfettiBlast.vue'
+import HabitCard            from '@/components/HabitCard.vue'
+import ConfettiBlast        from '@/components/ConfettiBlast.vue'
 import NotificationSettings from '@/components/NotificationSettings.vue'
+import PageHeader           from '@/components/PageHeader.vue'
 
 const habits = useHabitsStore()
 const todayStr = formatDateId(nowWIB())

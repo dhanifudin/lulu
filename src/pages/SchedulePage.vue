@@ -1,13 +1,14 @@
 <template>
   <div class="min-h-screen bg-cream">
     <!-- Header -->
-    <div class="flower-bg bg-gradient-to-b from-pink-100 to-cream px-6 pt-8 pb-4">
+    <PageHeader>
       <h1 class="font-display font-bold text-plum-700 text-2xl">📅 Jadwal Kelas</h1>
-      <p class="text-sm text-plum-700/60">I-B ICP · SD Lab UM Malang 2026/2027</p>
-    </div>
+      <p class="text-sm text-plum-700/60 mt-0.5">I-B ICP · SD Lab UM Malang 2026/2027</p>
+    </PageHeader>
 
     <!-- Day tabs -->
-    <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar border-b border-pink-100">
+    <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100">
+      <div class="flex gap-2 max-w-lg mx-auto px-3">
       <button
         v-for="day in DAYS"
         :key="day.dow"
@@ -19,9 +20,10 @@
       >
         {{ day.short }}
       </button>
+      </div>
     </div>
 
-    <div class="px-4 pt-4 pb-6">
+    <div class="page pt-4 pb-6">
       <!-- Uniform for selected day -->
       <div class="mb-4">
         <UniformBadge :uniform="schedule.uniformForDay(activeDay)" />
@@ -54,6 +56,7 @@ import { useScheduleStore } from '@/stores/schedule'
 import { dayOfWeekWIB } from '@/lib/time'
 import SubjectCard  from '@/components/SubjectCard.vue'
 import UniformBadge from '@/components/UniformBadge.vue'
+import PageHeader   from '@/components/PageHeader.vue'
 
 const schedule = useScheduleStore()
 
