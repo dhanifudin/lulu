@@ -64,100 +64,6 @@
         </div>
       </div>
 
-      <!-- ── Live Schedule ── -->
-      <div>
-        <h2 class="font-display font-bold text-plum-700 text-base mb-2 flex items-center gap-2">
-          {{ t('home.todaySchedule') }}
-          <span class="badge bg-pink-100 text-pink-500 text-xs">{{ currentTimeDisplay }}</span>
-        </h2>
-
-        <!-- Weekend / holiday rest state -->
-        <div v-if="isWeekend || isHoliday" class="card text-center py-6">
-          <div class="text-5xl mb-2">🌺</div>
-          <p class="font-display font-bold text-pink-400 text-lg">
-            {{ isWeekend ? t('home.restTitle') : t('home.holidayTitle') }}
-          </p>
-          <p class="text-sm text-plum-700/60 mt-1">{{ t('home.noSchool') }}</p>
-        </div>
-
-        <template v-else>
-          <!-- Loading -->
-          <div v-if="schedule.loading" class="text-center py-8 text-pink-300 text-3xl">🌸</div>
-
-          <template v-else>
-            <!-- Current lesson highlight -->
-            <div v-if="schedule.currentSlot"
-                 class="card bg-pink-50 border-2 border-pink-300 mb-2 animate-pop">
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="badge bg-pink-400 text-white text-xs font-bold">{{ t('home.now') }}</span>
-                <span class="text-xs text-plum-700/50">
-                  {{ schedule.currentSlot.start_time }} – {{ schedule.currentSlot.end_time }}
-                </span>
-                <!-- Pulse dot -->
-                <span class="ml-auto relative flex h-2.5 w-2.5">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500"></span>
-                </span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-2xl">{{ currentSubjectEmoji }}</span>
-                <p class="font-display font-bold text-plum-700 text-base">{{ currentSubjectName }}</p>
-              </div>
-            </div>
-
-            <!-- Next lesson -->
-            <div v-if="nextSlot" class="card border border-pink-100 mb-2">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-plum-700/40">{{ t('home.next') }}</span>
-                <span class="text-xs text-plum-700/40">{{ nextSlot.start_time }}</span>
-                <div class="flex-1" />
-                <span class="text-xl">{{ nextSubjectEmoji }}</span>
-                <p class="font-display font-semibold text-plum-700 text-sm">{{ nextSubjectName }}</p>
-              </div>
-            </div>
-
-            <!-- Full schedule list -->
-            <div class="space-y-2">
-              <SubjectCard
-                v-for="slot in schedule.todaySlots"
-                :key="slot.id"
-                :slot="slot"
-                :subject="schedule.getSubject(slot.subject_key)"
-                :is-active="schedule.currentSlot?.id === slot.id"
-              />
-              <p v-if="!schedule.todaySlots.length"
-                 class="text-center text-plum-700/40 text-sm py-4">
-                {{ t('home.noSchool') }}
-              </p>
-            </div>
-          </template>
-        </template>
-      </div>
-
-      <!-- ── Habit Consistency ── -->
-      <div>
-        <h2 class="font-display font-bold text-plum-700 text-base mb-2">
-          {{ t('home.todayHabits') }}
-        </h2>
-        <div v-if="habits.loading" class="text-center py-4 text-pink-300">🌸</div>
-        <div v-else class="space-y-2">
-          <HabitCard
-            v-for="habit in habits.habits"
-            :key="habit.id"
-            :habit="habit"
-            :done="habits.isCompletedToday(habit.id)"
-            :stars="habits.starCount(habit.id)"
-            :current-streak="habits.streak(habit.id)"
-            :week-grid="habits.weekGrid(habit.id)"
-            @toggle="habits.toggle"
-          />
-          <p v-if="!habits.habits.length"
-             class="text-center text-plum-700/40 text-sm py-4">
-            {{ t('home.noHabits') }}
-          </p>
-        </div>
-      </div>
-
       <!-- ── Upcoming Exams & Events ── -->
       <div v-if="upcomingEvents.length">
         <h2 class="font-display font-bold text-plum-700 text-base mb-2">
@@ -194,16 +100,12 @@ import { useScheduleStore } from '@/stores/schedule'
 import { useHabitsStore }   from '@/stores/habits'
 import { useCalendarStore, EVENT_EMOJI, EVENT_COLORS } from '@/stores/calendar'
 import { nowWIB, todayWIB, dayOfWeekWIB, formatDay, formatDate, currentTimeWIB } from '@/lib/time'
-import { useDisplayName } from '@/composables/useDisplayName'
-import SubjectCard   from '@/components/SubjectCard.vue'
-import HabitCard     from '@/components/HabitCard.vue'
 import UniformBadge  from '@/components/UniformBadge.vue'
 import ConfettiBlast from '@/components/ConfettiBlast.vue'
 import PageHeader    from '@/components/PageHeader.vue'
 import LangToggle    from '@/components/LangToggle.vue'
 
 const { t, locale } = useI18n()
-const { pick }      = useDisplayName()
 
 const auth     = useAuthStore()
 const schedule = useScheduleStore()
@@ -248,39 +150,6 @@ const weekCompletionPct = computed(() => {
   return Math.round((done / total) * 100)
 })
 
-// ── Live schedule helpers ─────────────────────────────────────────
-/** Next slot after the current clock time */
-const nextSlot = computed(() => {
-  const now = currentTimeDisplay.value
-  return schedule.todaySlots.find(s => s.start_time > now) ?? null
-})
-
-/** Current lesson display helpers (locale-reactive) */
-const currentSubjectEmoji = computed(() =>
-  schedule.currentSlot
-    ? (schedule.getSubject(schedule.currentSlot.subject_key)?.emoji ?? '📚')
-    : '📚'
-)
-const currentSubjectName = computed(() => {
-  const slot = schedule.currentSlot
-  if (!slot) return ''
-  const sub = schedule.getSubject(slot.subject_key)
-  return pick(sub?.name_id ?? slot.subject_key, sub?.name_en ?? slot.subject_key)
-})
-
-/** Next lesson display helpers (locale-reactive) */
-const nextSubjectEmoji = computed(() =>
-  nextSlot.value
-    ? (schedule.getSubject(nextSlot.value.subject_key)?.emoji ?? '📚')
-    : '📚'
-)
-const nextSubjectName = computed(() => {
-  const slot = nextSlot.value
-  if (!slot) return ''
-  const sub = schedule.getSubject(slot.subject_key)
-  return pick(sub?.name_id ?? slot.subject_key, sub?.name_en ?? slot.subject_key)
-})
-
 // ── Upcoming events ───────────────────────────────────────────────
 const upcomingEvents = computed(() =>
   cal.events
@@ -303,9 +172,9 @@ watch(() => habits.allDoneToday, (val) => {
 onMounted(async () => {
   const year = now.getFullYear()
   await Promise.all([
-    schedule.fetchAll(),
-    habits.fetchAll(),
-    cal.fetchYear(year),
+    schedule.fetchAll(),   // needed for todayUniform
+    habits.fetchAll(),     // needed for KPI stats
+    cal.fetchYear(year),   // needed for upcoming events + holiday detection
   ])
 })
 </script>
