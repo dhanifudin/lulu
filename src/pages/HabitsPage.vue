@@ -14,10 +14,12 @@
           <p class="font-display font-bold text-orange-400 text-2xl">🔥 {{ maxStreak }}</p>
           <p class="text-[11px] text-plum-700/60 leading-tight mt-0.5 whitespace-pre-line">{{ t('habits.longestStreak') }}</p>
         </div>
-        <div class="card-pink flex-1 text-center py-2">
+        <RouterLink to="/rewards"
+          class="card-pink flex-1 text-center py-2 block active:scale-95 transition-transform">
           <p class="font-display font-bold text-pink-400 text-2xl">⭐ {{ totalStars }}</p>
           <p class="text-[11px] text-plum-700/60 leading-tight mt-0.5 whitespace-pre-line">{{ t('habits.totalStars') }}</p>
-        </div>
+          <p class="text-[10px] text-pink-400 mt-0.5">{{ t('habits.viewRewards') }}</p>
+        </RouterLink>
       </div>
     </AppHeader>
 

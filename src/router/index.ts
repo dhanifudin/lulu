@@ -39,6 +39,11 @@ const router = createRouter({
       component: () => import('@/pages/SettingsPage.vue'),
     },
     {
+      path: '/rewards',
+      name: 'rewards',
+      component: () => import('@/pages/RewardsPage.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },
