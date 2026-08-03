@@ -32,6 +32,14 @@
         </div>
 
         <template v-if="store.subscribed">
+          <!-- Test button — near the top so it's easy to find -->
+          <button @click="sendTest" :disabled="testing"
+                  class="w-full flex items-center justify-center gap-2 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-600 font-semibold text-sm py-2.5 transition-all active:scale-95 disabled:opacity-50">
+            <span v-if="testing" class="text-base animate-spin">🌸</span>
+            <span v-else class="text-base">🔔</span>
+            {{ testLabel }}
+          </button>
+
           <!-- Night before -->
           <div class="space-y-2">
             <label class="flex items-center gap-3 cursor-pointer py-1">
@@ -69,14 +77,6 @@
           </div>
 
           <button @click="save" class="btn-secondary w-full">{{ t('notifications.save') }}</button>
-
-          <!-- Test button -->
-          <button @click="sendTest" :disabled="testing"
-                  class="w-full flex items-center justify-center gap-2 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-600 font-semibold text-sm py-2.5 transition-all active:scale-95 disabled:opacity-50">
-            <span v-if="testing" class="text-base animate-spin">🌸</span>
-            <span v-else class="text-base">🔔</span>
-            {{ testLabel }}
-          </button>
         </template>
       </template>
     </template>
