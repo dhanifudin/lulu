@@ -43,7 +43,7 @@ const route = useRoute()
 const router = useRouter()
 
 // After PKCE code exchange, onAuthStateChange fires AFTER the router has
-// already sent the unauthenticated user to #/login. Watch isLoggedIn so
+// already sent the unauthenticated user to /login. Watch isLoggedIn so
 // we navigate away as soon as the session is confirmed.
 watch(() => auth.isLoggedIn, (loggedIn) => {
   if (loggedIn && route.name === 'login') {
