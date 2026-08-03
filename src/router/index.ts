@@ -19,19 +19,24 @@ const router = createRouter({
       component: () => import('@/pages/TodayPage.vue'),
     },
     {
-      path: '/jadwal',
+      path: '/schedule',
       name: 'schedule',
       component: () => import('@/pages/SchedulePage.vue'),
     },
     {
-      path: '/kebiasaan',
+      path: '/habits',
       name: 'habits',
       component: () => import('@/pages/HabitsPage.vue'),
     },
     {
-      path: '/kalender',
+      path: '/calendar',
       name: 'calendar',
       component: () => import('@/pages/CalendarPage.vue'),
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/pages/SettingsPage.vue'),
     },
     {
       path: '/:pathMatch(.*)*',

@@ -32,16 +32,25 @@ export const EVENT_EMOJI: Record<EventType, string> = {
 export const useCalendarStore = defineStore('calendar', () => {
   const events = ref<CalendarEvent[]>([])
   const loading = ref(false)
+  const fetchedYears = new Set<number>()
 
   async function fetchYear(year: number) {
+    if (fetchedYears.has(year)) return   // already cached
+    fetchedYears.add(year)               // mark before await — blocks duplicate in-flight calls
     loading.value = true
     const { data } = await supabase
       .from('calendar_events')
       .select('*')
       .gte('start_date', `${year}-01-01`)
-      .lte('end_date', `${year}-12-31`)
+      .lte('end_date',   `${year}-12-31`)
       .order('start_date')
-    if (data) events.value = data
+    if (data) {
+      // Merge: replace this year's slice, keep all other years
+      events.value = [
+        ...events.value.filter(e => !e.start_date.startsWith(String(year))),
+        ...data,
+      ]
+    }
     loading.value = false
   }
 

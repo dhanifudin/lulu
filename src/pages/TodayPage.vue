@@ -50,7 +50,7 @@
             <span class="text-xl flex-shrink-0">{{ EVENT_EMOJI[e.type] }}</span>
             <div class="flex-1 min-w-0">
               <p class="font-semibold text-plum-700 text-sm truncate">{{ e.title }}</p>
-              <p class="text-xs text-plum-700/50 mt-0.5">{{ e.start_date }}</p>
+              <p class="text-xs text-plum-700/50 mt-0.5">{{ formatLongDate(new Date(e.start_date), locale) }}</p>
             </div>
             <span class="flex-shrink-0 text-xs font-semibold rounded-lg px-2 py-1"
                   :style="{ backgroundColor: EVENT_COLORS[e.type] + '33', color: EVENT_COLORS[e.type] }">
@@ -73,12 +73,12 @@ import { useAuthStore }     from '@/stores/auth'
 import { useScheduleStore } from '@/stores/schedule'
 import { useHabitsStore }   from '@/stores/habits'
 import { useCalendarStore, EVENT_EMOJI, EVENT_COLORS } from '@/stores/calendar'
-import { nowWIB, todayWIB, dayOfWeekWIB } from '@/lib/time'
+import { nowWIB, todayWIB, dayOfWeekWIB, formatLongDate } from '@/lib/time'
 import AppHeader     from '@/components/AppHeader.vue'
 import UniformBadge  from '@/components/UniformBadge.vue'
 import ConfettiBlast from '@/components/ConfettiBlast.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const auth     = useAuthStore()
 const schedule = useScheduleStore()

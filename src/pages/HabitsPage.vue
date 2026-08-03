@@ -67,37 +67,21 @@
             {{ t('habits.noHabitsInGroup') }}
           </p>
         </div>
-
-        <!-- Add habit -->
-        <div class="card space-y-3 mt-4">
-          <h3 class="font-display font-bold text-plum-700">{{ t('habits.addTitle') }}</h3>
-          <input v-model="newNameId" :placeholder="t('habits.namePlaceholder')" class="input" />
-          <input v-model="newNameEn" :placeholder="t('habits.nameEnPlaceholder')" class="input" />
-          <input v-model="newEmoji"  :placeholder="t('habits.emojiPlaceholder')"  class="input" />
-
-          <!-- Time window: 2-col with labels -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs font-semibold text-plum-700/60 mb-1.5 block">{{ t('habits.startLabel') }}</label>
-              <input type="time" v-model="newStartTime" class="input" />
-            </div>
-            <div>
-              <label class="text-xs font-semibold text-plum-700/60 mb-1.5 block">{{ t('habits.endLabel') }}</label>
-              <input type="time" v-model="newEndTime" class="input" />
-            </div>
-          </div>
-
-          <button @click="addHabit" :disabled="!newNameId" class="btn-primary">
-            {{ t('habits.addBtn') }}
-          </button>
-        </div>
-
-        <!-- Notification settings -->
-        <NotificationSettings />
       </template>
     </div>
 
+    <!-- FAB: add habit -->
+    <button @click="showAddModal = true"
+            class="fixed bottom-28 right-4 z-40 w-14 h-14 rounded-full bg-pink-400 hover:bg-pink-500
+                   text-white text-3xl shadow-flower flex items-center justify-center
+                   transition-all active:scale-95 select-none">
+      ＋
+    </button>
+
     <ConfettiBlast :show="showConfetti" />
+
+    <!-- Add modal -->
+    <HabitAddModal :show="showAddModal" @close="showAddModal = false" @add="onHabitAdded" />
 
     <!-- Edit modal -->
     <HabitEditModal
@@ -115,11 +99,11 @@ import { useI18n } from 'vue-i18n'
 import { useHabitsStore, type Habit } from '@/stores/habits'
 import { usePrayerTimesStore, type PrayerKey } from '@/stores/prayerTimes'
 import { currentTimeWIB } from '@/lib/time'
-import AppHeader            from '@/components/AppHeader.vue'
-import HabitCard            from '@/components/HabitCard.vue'
-import HabitEditModal       from '@/components/HabitEditModal.vue'
-import ConfettiBlast        from '@/components/ConfettiBlast.vue'
-import NotificationSettings from '@/components/NotificationSettings.vue'
+import AppHeader      from '@/components/AppHeader.vue'
+import HabitCard      from '@/components/HabitCard.vue'
+import HabitAddModal  from '@/components/HabitAddModal.vue'
+import HabitEditModal from '@/components/HabitEditModal.vue'
+import ConfettiBlast  from '@/components/ConfettiBlast.vue'
 
 const { t }   = useI18n()
 const habits  = useHabitsStore()
@@ -141,22 +125,17 @@ interface HabitItem {
   sortKey: string
 }
 
-/** Effective start time: live prayer time for prayer habits, else DB start_time. */
 function effectiveStart(habit: Habit): string | null {
-  if (habit.prayer_key) {
-    return prayers.timeFor(habit.prayer_key as PrayerKey)
-  }
+  if (habit.prayer_key) return prayers.timeFor(habit.prayer_key as PrayerKey)
   return habit.start_time ? habit.start_time.slice(0, 5) : null
 }
 
-/** Human-readable time label: "04:32" for prayers, "06:00–06:10" for timed habits. */
 function buildTimeLabel(habit: Habit, start: string | null): string | null {
   if (!start) return null
   const end = (!habit.prayer_key && habit.end_time) ? habit.end_time.slice(0, 5) : null
   return end ? `${start}–${end}` : start
 }
 
-/** Map effective start to bucket. */
 function getBucket(start: string | null): Bucket {
   if (!start) return 'chores'
   if (start < '12:00') return 'morning'
@@ -164,10 +143,8 @@ function getBucket(start: string | null): Bucket {
   return 'evening'
 }
 
-// All 4 buckets always present (empty arrays for empty ones)
 const groupedHabits = computed((): Record<Bucket, HabitItem[]> => {
   const map: Record<Bucket, HabitItem[]> = { morning: [], afternoon: [], evening: [], chores: [] }
-
   for (const habit of habits.habits) {
     const start  = effectiveStart(habit)
     const bucket = getBucket(start)
@@ -177,20 +154,25 @@ const groupedHabits = computed((): Record<Bucket, HabitItem[]> => {
       sortKey: start ?? `z${String(habit.sort_order).padStart(6, '0')}`,
     })
   }
-
   for (const bucket of BUCKETS) {
     map[bucket].sort((a, b) => a.sortKey.localeCompare(b.sortKey))
   }
-
   return map
 })
 
-// Active tab: default to current time-of-day bucket
 const activeBucket = ref<Bucket>(getBucket(currentTimeWIB()))
 
-/** Count of completed habits in a bucket today. */
 function doneInBucket(bucket: Bucket): number {
   return groupedHabits.value[bucket].filter(item => habits.isCompletedToday(item.habit.id)).length
+}
+
+// ── Add habit ─────────────────────────────────────────────────────────────────
+
+const showAddModal = ref(false)
+
+async function onHabitAdded(data: Omit<Habit, 'id' | 'sort_order' | 'active' | 'prayer_key'>) {
+  await habits.addHabit(data)
+  showAddModal.value = false
 }
 
 // ── Edit / delete habit ───────────────────────────────────────────────────────
@@ -205,30 +187,6 @@ async function onEditSave(patch: Parameters<typeof habits.updateHabit>[1]) {
 async function onEditDelete(id: string) {
   await habits.deleteHabit(id)
   editingHabit.value = null
-}
-
-// ── Add habit form ────────────────────────────────────────────────────────────
-
-const newNameId    = ref('')
-const newNameEn    = ref('')
-const newEmoji     = ref('⭐')
-const newStartTime = ref('')
-const newEndTime   = ref('')
-
-async function addHabit() {
-  if (!newNameId.value) return
-  await habits.addHabit({
-    name_id:    newNameId.value,
-    name_en:    newNameEn.value || newNameId.value,
-    emoji:      newEmoji.value || '⭐',
-    start_time: newStartTime.value || null,
-    end_time:   newEndTime.value   || null,
-  })
-  newNameId.value    = ''
-  newNameEn.value    = ''
-  newEmoji.value     = '⭐'
-  newStartTime.value = ''
-  newEndTime.value   = ''
 }
 
 // ── Confetti ──────────────────────────────────────────────────────────────────

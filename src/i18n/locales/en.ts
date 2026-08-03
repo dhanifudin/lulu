@@ -14,6 +14,7 @@ export default {
     schedule: 'Schedule',
     habits: 'Habits',
     calendar: 'Calendar',
+    settings: 'Settings',
   },
   // 7 elements, indexed by JS getDay() (0=Sun … 6=Sat)
   days: {

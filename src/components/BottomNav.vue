@@ -38,10 +38,11 @@ const { t } = useI18n()
 const route = useRoute()
 
 const tabs = [
-  { to: '/',          icon: '🏠', labelKey: 'nav.home'     },
-  { to: '/jadwal',    icon: '📅', labelKey: 'nav.schedule' },
-  { to: '/kebiasaan', icon: '⭐', labelKey: 'nav.habits'   },
-  { to: '/kalender',  icon: '🌸', labelKey: 'nav.calendar' },
+  { to: '/',         icon: '🏠', labelKey: 'nav.home'     },
+  { to: '/schedule', icon: '📅', labelKey: 'nav.schedule' },
+  { to: '/habits',   icon: '⭐', labelKey: 'nav.habits'   },
+  { to: '/calendar', icon: '🌸', labelKey: 'nav.calendar' },
+  { to: '/settings', icon: '⚙️', labelKey: 'nav.settings' },
 ]
 
 function isActive(path: string): boolean {

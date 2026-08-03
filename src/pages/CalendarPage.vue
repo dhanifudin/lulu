@@ -15,6 +15,10 @@
     </AppHeader>
 
     <div class="page pt-4 pb-6">
+      <!-- Loading -->
+      <div v-if="cal.loading" class="text-center py-12 text-3xl text-pink-300">🌸</div>
+
+      <template v-else>
       <!-- Day-of-week headers -->
       <div class="grid grid-cols-7 mb-2">
         <div v-for="d in dowLabels" :key="d"
@@ -75,6 +79,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -155,8 +160,8 @@ function nextMonth() {
   selectedDay.value = null
 }
 
-onMounted(() => {
-  cal.fetchYear(2026)
-  cal.fetchYear(2027)
+onMounted(async () => {
+  await cal.fetchYear(2026)
+  await cal.fetchYear(2027)
 })
 </script>

@@ -14,6 +14,7 @@ export default {
     schedule: 'Jadwal',
     habits: 'Kebiasaan',
     calendar: 'Kalender',
+    settings: 'Pengaturan',
   },
   // 7 elements, indexed by JS getDay() (0=Min/Sun … 6=Sab/Sat)
   days: {
