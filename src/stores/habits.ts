@@ -98,6 +98,21 @@ export const useHabitsStore = defineStore('habits', () => {
     }
   }
 
+  /** Update editable fields of a habit */
+  async function updateHabit(id: string, patch: Partial<Pick<Habit, 'name_id' | 'name_en' | 'emoji' | 'start_time' | 'end_time'>>) {
+    const { data } = await supabase.from('habits').update(patch).eq('id', id).select().single()
+    if (data) {
+      const i = habits.value.findIndex(h => h.id === id)
+      if (i !== -1) habits.value[i] = data
+    }
+  }
+
+  /** Soft-delete a habit — sets active=false, keeps logs/history */
+  async function deleteHabit(id: string) {
+    await supabase.from('habits').update({ active: false }).eq('id', id)
+    habits.value = habits.value.filter(h => h.id !== id)
+  }
+
   /** Add a new habit */
   async function addHabit(habit: Omit<Habit, 'id' | 'sort_order' | 'active' | 'prayer_key'>) {
     const maxOrder = habits.value.reduce((m, h) => Math.max(m, h.sort_order), 0)
@@ -123,6 +138,6 @@ export const useHabitsStore = defineStore('habits', () => {
   return {
     habits, logs, loading,
     fetchAll, isCompletedToday, starCount, streak, allDoneToday,
-    toggle, addHabit, weekGrid,
+    toggle, addHabit, updateHabit, deleteHabit, weekGrid,
   }
 })

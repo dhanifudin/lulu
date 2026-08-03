@@ -1,8 +1,9 @@
 <template>
-  <div class="card flex items-center gap-4 animate-pop">
-    <!-- Check circle -->
+  <div class="card flex items-center gap-4 animate-pop cursor-pointer"
+       @click="emit('edit', habit)">
+    <!-- Check circle (stop propagation so it doesn't open the editor) -->
     <button
-      @click="emit('toggle', habit.id)"
+      @click.stop="emit('toggle', habit.id)"
       class="habit-circle flex-shrink-0"
       :class="done ? 'habit-circle-done' : 'habit-circle-todo'"
       :aria-label="done
@@ -60,7 +61,7 @@ const props = defineProps<{
   timeLabel?: string | null
 }>()
 
-const emit = defineEmits<{ toggle: [id: string] }>()
+const emit = defineEmits<{ toggle: [id: string]; edit: [habit: Habit] }>()
 
 const { t, tm } = useI18n()
 const { pick }  = useDisplayName()

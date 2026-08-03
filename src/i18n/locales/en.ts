@@ -65,6 +65,11 @@ export default {
     markUndone: 'Undo {name}',
     noHabits: 'No active habits 😊',
     noHabitsInGroup: 'No habits in this category yet 😊',
+    editTitle: '✏️ Edit Habit',
+    deleteBtn: 'Delete 🗑',
+    deleteConfirm: 'Delete for sure?',
+    cancelBtn: 'Cancel',
+    prayerTimeNote: 'Prayer time is set automatically for Malang 🕌',
     groups: {
       morning:   '🌅 Morning',
       afternoon: '☀️ Afternoon',

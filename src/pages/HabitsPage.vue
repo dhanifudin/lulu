@@ -21,20 +21,22 @@
       </div>
     </AppHeader>
 
-    <!-- Category tabs -->
+    <!-- Category tabs: icon-only when unselected, full label+count when active -->
     <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100">
       <div class="flex gap-2 max-w-lg mx-auto px-3">
         <button
           v-for="bucket in BUCKETS"
           :key="bucket"
           @click="activeBucket = bucket"
-          class="flex-shrink-0 px-4 py-2 rounded-2xl text-sm font-display font-bold transition-all duration-150"
+          class="flex-shrink-0 flex items-center gap-1 rounded-2xl text-sm font-display font-bold transition-all duration-150"
           :class="activeBucket === bucket
-            ? 'bg-pink-300 text-white shadow-flower scale-105'
-            : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100'"
+            ? 'bg-pink-300 text-white shadow-flower px-4 py-2'
+            : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100 px-3 py-2'"
+          :aria-label="t(`habits.groups.${bucket}`)"
         >
-          {{ t(`habits.groups.${bucket}`) }}
-          <span v-if="groupedHabits[bucket].length" class="ml-1 text-xs opacity-75">
+          <span v-if="activeBucket === bucket">{{ t(`habits.groups.${bucket}`) }}</span>
+          <span v-else class="text-base leading-none">{{ BUCKET_ICONS[bucket] }}</span>
+          <span v-if="activeBucket === bucket && groupedHabits[bucket].length" class="text-xs opacity-75">
             {{ doneInBucket(bucket) }}/{{ groupedHabits[bucket].length }}
           </span>
         </button>
@@ -58,6 +60,7 @@
             :current-streak="habits.streak(item.habit.id)"
             :week-grid="habits.weekGrid(item.habit.id)"
             @toggle="habits.toggle"
+            @edit="editingHabit = $event"
           />
           <p v-if="!groupedHabits[activeBucket].length"
              class="text-center text-plum-700/40 text-sm py-8">
@@ -95,6 +98,14 @@
     </div>
 
     <ConfettiBlast :show="showConfetti" />
+
+    <!-- Edit modal -->
+    <HabitEditModal
+      :habit="editingHabit"
+      @close="editingHabit = null"
+      @save="onEditSave"
+      @delete="onEditDelete"
+    />
   </div>
 </template>
 
@@ -106,6 +117,7 @@ import { usePrayerTimesStore, type PrayerKey } from '@/stores/prayerTimes'
 import { currentTimeWIB } from '@/lib/time'
 import AppHeader            from '@/components/AppHeader.vue'
 import HabitCard            from '@/components/HabitCard.vue'
+import HabitEditModal       from '@/components/HabitEditModal.vue'
 import ConfettiBlast        from '@/components/ConfettiBlast.vue'
 import NotificationSettings from '@/components/NotificationSettings.vue'
 
@@ -121,6 +133,7 @@ const maxStreak  = computed(() => habits.habits.reduce((m, h) => Math.max(m, hab
 
 type Bucket = 'morning' | 'afternoon' | 'evening' | 'chores'
 const BUCKETS: Bucket[] = ['morning', 'afternoon', 'evening', 'chores']
+const BUCKET_ICONS: Record<Bucket, string> = { morning: '🌅', afternoon: '☀️', evening: '🌙', chores: '🧹' }
 
 interface HabitItem {
   habit: Habit
@@ -178,6 +191,20 @@ const activeBucket = ref<Bucket>(getBucket(currentTimeWIB()))
 /** Count of completed habits in a bucket today. */
 function doneInBucket(bucket: Bucket): number {
   return groupedHabits.value[bucket].filter(item => habits.isCompletedToday(item.habit.id)).length
+}
+
+// ── Edit / delete habit ───────────────────────────────────────────────────────
+
+const editingHabit = ref<Habit | null>(null)
+
+async function onEditSave(patch: Parameters<typeof habits.updateHabit>[1]) {
+  await habits.updateHabit(editingHabit.value!.id, patch)
+  editingHabit.value = null
+}
+
+async function onEditDelete(id: string) {
+  await habits.deleteHabit(id)
+  editingHabit.value = null
 }
 
 // ── Add habit form ────────────────────────────────────────────────────────────

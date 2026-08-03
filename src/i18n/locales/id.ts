@@ -65,6 +65,11 @@ export default {
     markUndone: 'Batal {name}',
     noHabits: 'Tidak ada kebiasaan aktif 😊',
     noHabitsInGroup: 'Belum ada kebiasaan di kategori ini 😊',
+    editTitle: '✏️ Ubah Kebiasaan',
+    deleteBtn: 'Hapus 🗑',
+    deleteConfirm: 'Yakin hapus?',
+    cancelBtn: 'Batal',
+    prayerTimeNote: 'Waktu sholat otomatis dari lokasi Malang 🕌',
     groups: {
       morning:   '🌅 Pagi',
       afternoon: '☀️ Siang',
