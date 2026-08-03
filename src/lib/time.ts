@@ -4,7 +4,7 @@
  */
 import { toZonedTime } from 'date-fns-tz'
 import { format, startOfDay, isSameDay, differenceInCalendarDays } from 'date-fns'
-import { id as localeId } from 'date-fns/locale'
+import { id as localeId, enUS } from 'date-fns/locale'
 
 export const TZ = 'Asia/Jakarta'
 
@@ -34,6 +34,16 @@ export function formatDayId(date: Date): string {
 /** Format a date to Indonesian full date */
 export function formatDateId(date: Date): string {
   return format(toZonedTime(date, TZ), 'd MMMM yyyy', { locale: localeId })
+}
+
+/** Format a date to weekday name, locale-aware ('id' or 'en') */
+export function formatDay(date: Date, lang: string): string {
+  return format(toZonedTime(date, TZ), 'EEEE', { locale: lang === 'en' ? enUS : localeId })
+}
+
+/** Format a date to full date string, locale-aware ('id' or 'en') */
+export function formatDate(date: Date, lang: string): string {
+  return format(toZonedTime(date, TZ), 'd MMMM yyyy', { locale: lang === 'en' ? enUS : localeId })
 }
 
 /** Current time as HH:mm in WIB */

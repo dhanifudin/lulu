@@ -20,7 +20,7 @@
           </span>
           <span class="text-xs font-semibold font-body leading-none"
                 :class="isActive(tab.to) ? 'text-pink-500' : 'text-plum-700/45'">
-            {{ tab.label }}
+            {{ t(tab.labelKey) }}
           </span>
         </RouterLink>
       </div>
@@ -31,15 +31,17 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
+const { t } = useI18n()
 const route = useRoute()
 
 const tabs = [
-  { to: '/',          icon: '🏠', label: 'Beranda'  },
-  { to: '/jadwal',    icon: '📅', label: 'Jadwal'   },
-  { to: '/kebiasaan', icon: '⭐', label: 'Kebiasaan'},
-  { to: '/kalender',  icon: '🌸', label: 'Kalender' },
+  { to: '/',          icon: '🏠', labelKey: 'nav.home'     },
+  { to: '/jadwal',    icon: '📅', labelKey: 'nav.schedule' },
+  { to: '/kebiasaan', icon: '⭐', labelKey: 'nav.habits'   },
+  { to: '/kalender',  icon: '🌸', labelKey: 'nav.calendar' },
 ]
 
 function isActive(path: string): boolean {

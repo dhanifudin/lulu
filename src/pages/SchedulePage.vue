@@ -2,24 +2,24 @@
   <div class="min-h-screen bg-cream">
     <!-- Header -->
     <PageHeader>
-      <h1 class="font-display font-bold text-plum-700 text-2xl">📅 Jadwal Kelas</h1>
-      <p class="text-sm text-plum-700/60 mt-0.5">I-B ICP · SD Lab UM Malang 2026/2027</p>
+      <h1 class="font-display font-bold text-plum-700 text-2xl">{{ t('schedule.title') }}</h1>
+      <p class="text-sm text-plum-700/60 mt-0.5">{{ t('schedule.subtitle') }}</p>
     </PageHeader>
 
     <!-- Day tabs -->
     <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100">
       <div class="flex gap-2 max-w-lg mx-auto px-3">
-      <button
-        v-for="day in DAYS"
-        :key="day.dow"
-        @click="activeDay = day.dow"
-        class="flex-shrink-0 px-4 py-2 rounded-2xl text-sm font-display font-bold transition-all duration-150"
-        :class="activeDay === day.dow
-          ? 'bg-pink-300 text-white shadow-flower scale-105'
-          : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100'"
-      >
-        {{ day.short }}
-      </button>
+        <button
+          v-for="(day, i) in schoolDays"
+          :key="day.dow"
+          @click="activeDay = day.dow"
+          class="flex-shrink-0 px-4 py-2 rounded-2xl text-sm font-display font-bold transition-all duration-150"
+          :class="activeDay === day.dow
+            ? 'bg-pink-300 text-white shadow-flower scale-105'
+            : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100'"
+        >
+          {{ weekdayShort[i] }}
+        </button>
       </div>
     </div>
 
@@ -43,7 +43,7 @@
         />
         <p v-if="!schedule.slotsForDay(activeDay).length"
            class="text-center text-plum-700/40 text-sm py-8">
-          Tidak ada jadwal 😊
+          {{ t('schedule.noSchedule') }}
         </p>
       </div>
     </div>
@@ -52,25 +52,24 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useScheduleStore } from '@/stores/schedule'
 import { dayOfWeekWIB } from '@/lib/time'
 import SubjectCard  from '@/components/SubjectCard.vue'
 import UniformBadge from '@/components/UniformBadge.vue'
 import PageHeader   from '@/components/PageHeader.vue'
 
-const schedule = useScheduleStore()
+const { t, tm } = useI18n()
+const schedule  = useScheduleStore()
 
-const todayDow = dayOfWeekWIB()
-// Only Mon-Fri (1-5) are school days; default to today or Monday
+const todayDow  = dayOfWeekWIB()
 const activeDay = ref(todayDow >= 1 && todayDow <= 5 ? todayDow : 1)
-const isToday = computed(() => activeDay.value === todayDow)
+const isToday   = computed(() => activeDay.value === todayDow)
 
-const DAYS = [
-  { dow: 1, label: 'Senin',  short: 'Sen' },
-  { dow: 2, label: 'Selasa', short: 'Sel' },
-  { dow: 3, label: 'Rabu',   short: 'Rab' },
-  { dow: 4, label: 'Kamis',  short: 'Kam' },
-  { dow: 5, label: 'Jumat',  short: 'Jum' },
+// Mon-Fri day objects — reactive to locale changes via tm()
+const weekdayShort = computed(() => tm('days.weekdayShort') as string[])
+const schoolDays   = [
+  { dow: 1 }, { dow: 2 }, { dow: 3 }, { dow: 4 }, { dow: 5 },
 ]
 
 onMounted(() => schedule.fetchAll())

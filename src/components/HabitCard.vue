@@ -5,7 +5,9 @@
       @click="emit('toggle', habit.id)"
       class="habit-circle flex-shrink-0"
       :class="done ? 'habit-circle-done' : 'habit-circle-todo'"
-      :aria-label="done ? `Batal ${habit.name_id}` : `Selesai ${habit.name_id}`"
+      :aria-label="done
+        ? t('habits.markUndone', { name: displayName })
+        : t('habits.markDone',   { name: displayName })"
     >
       <span v-if="done" class="text-2xl">✓</span>
     </button>
@@ -13,9 +15,8 @@
     <!-- Info -->
     <div class="flex-1 min-w-0">
       <p class="font-display font-bold text-plum-700 text-base leading-tight">
-        {{ habit.emoji }} {{ habit.name_id }}
+        {{ habit.emoji }} {{ displayName }}
       </p>
-      <p class="text-xs text-plum-700/60">{{ habit.name_en }}</p>
 
       <!-- Week grid: last 7 days -->
       <div class="flex gap-1 mt-2">
@@ -35,13 +36,16 @@
         ⭐ {{ stars }}
       </p>
       <p v-if="currentStreak > 0" class="text-xs text-orange-400 font-semibold mt-1">
-        🔥 {{ currentStreak }} hari
+        {{ t('habits.streakDays', { n: currentStreak }) }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useDisplayName } from '@/composables/useDisplayName'
 import type { Habit } from '@/stores/habits'
 
 const props = defineProps<{
@@ -54,12 +58,19 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [id: string] }>()
 
-// Last 7 day short labels (Mon–Sun)
-const DAY_SHORT = ['Min','Sen','Sel','Rab','Kam','Jum','Sab']
-const today = new Date()
-const dayLabels = Array.from({ length: 7 }, (_, i) => {
-  const d = new Date(today)
-  d.setDate(d.getDate() - (6 - i))
-  return DAY_SHORT[d.getDay()]
+const { t, tm } = useI18n()
+const { pick }  = useDisplayName()
+
+const displayName = computed(() => pick(props.habit.name_id, props.habit.name_en))
+
+// Last 7 day short labels (reactive to locale changes)
+const dayLabels = computed(() => {
+  const shorts = tm('days.short') as string[]
+  const today  = new Date()
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today)
+    d.setDate(d.getDate() - (6 - i))
+    return shorts[d.getDay()]
+  })
 })
 </script>

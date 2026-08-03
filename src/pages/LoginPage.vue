@@ -14,8 +14,8 @@
         <!-- Logo / title -->
         <div class="text-7xl mb-3 animate-pop">🌸</div>
         <h1 class="font-display font-bold text-pink-500 text-3xl mb-1">Lulu</h1>
-        <p class="text-plum-700/60 text-sm mb-1">Jadwal Sekolah & Kebiasaan Baik</p>
-        <p class="text-plum-700/40 text-xs mb-8">Kelas I-B ICP · SD Lab UM Malang</p>
+        <p class="text-plum-700/60 text-sm mb-1">{{ t('login.subtitle') }}</p>
+        <p class="text-plum-700/40 text-xs mb-8">{{ t('login.school') }}</p>
 
         <!-- School items decoration -->
         <div class="flex justify-center gap-3 text-2xl mb-8 select-none">
@@ -35,11 +35,16 @@
             <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           <span v-if="loading" class="text-xl">🌸</span>
-          {{ loading ? 'Menghubungkan…' : 'Masuk dengan Google' }}
+          {{ loading ? t('login.connecting') : t('login.signIn') }}
         </button>
 
-        <p class="text-xs text-plum-700/40 mt-4">
-          Hanya untuk akun yang diizinkan 🔐
+        <!-- Language toggle on login screen -->
+        <div class="flex justify-center mt-4">
+          <LangToggle />
+        </div>
+
+        <p class="text-xs text-plum-700/40 mt-3">
+          {{ t('login.restricted') }}
         </p>
       </div>
     </div>
@@ -53,16 +58,19 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import LangToggle from '@/components/LangToggle.vue'
 
-const auth = useAuthStore()
+const { t }  = useI18n()
+const auth   = useAuthStore()
 const loading = ref(false)
 
 async function signIn() {
   loading.value = true
   try {
     await auth.signInWithGoogle()
-  } catch (e) {
+  } catch {
     loading.value = false
   }
 }

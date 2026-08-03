@@ -19,9 +19,6 @@
       <p class="font-display font-bold text-plum-700 text-sm leading-tight truncate">
         {{ displayLabel }}
       </p>
-      <p v-if="subject?.name_en && subject.name_en !== displayLabel" class="text-xs text-plum-700/60 truncate">
-        {{ subject.name_en }}
-      </p>
     </div>
 
     <!-- Emoji -->
@@ -39,6 +36,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useDisplayName } from '@/composables/useDisplayName'
 import type { ScheduleSlot, Subject } from '@/stores/schedule'
 
 const props = defineProps<{
@@ -46,6 +45,9 @@ const props = defineProps<{
   subject: Subject | undefined
   isActive?: boolean
 }>()
+
+const { locale } = useI18n()
+const { pick }   = useDisplayName()
 
 const isBreak = computed(() =>
   ['break', 'prayer'].includes(props.subject?.category ?? '')
@@ -57,7 +59,11 @@ const bgColor = computed(() => {
   return (props.subject?.color ?? '#FFC2D1') + '22'
 })
 
-const displayLabel = computed(() =>
-  props.slot.label ?? props.subject?.name_id ?? props.slot.subject_key
-)
+// In EN mode prefer name_en; fall back to slot.label or subject_key
+const displayLabel = computed(() => {
+  if (locale.value === 'en') {
+    return props.subject?.name_en ?? props.slot.label ?? props.slot.subject_key
+  }
+  return props.slot.label ?? props.subject?.name_id ?? props.slot.subject_key
+})
 </script>

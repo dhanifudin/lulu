@@ -2,14 +2,14 @@
   <div class="min-h-screen bg-cream">
     <!-- Header -->
     <PageHeader>
-      <h1 class="font-display font-bold text-plum-700 text-2xl">🌸 Kalender</h1>
-      <p class="text-sm text-plum-700/60 mt-0.5">Tahun Ajaran 2026 / 2027</p>
+      <h1 class="font-display font-bold text-plum-700 text-2xl">{{ t('calendar.title') }}</h1>
+      <p class="text-sm text-plum-700/60 mt-0.5">{{ t('calendar.subtitle') }}</p>
 
       <!-- Month navigation -->
       <div class="flex items-center justify-between mt-3">
         <button @click="prevMonth" class="btn-secondary px-4 py-2 text-sm">‹</button>
         <span class="font-display font-bold text-pink-500 text-lg">
-          {{ MONTHS[month - 1] }} {{ year }}
+          {{ months[month - 1] }} {{ year }}
         </span>
         <button @click="nextMonth" class="btn-secondary px-4 py-2 text-sm">›</button>
       </div>
@@ -18,7 +18,7 @@
     <div class="page pt-4 pb-6">
       <!-- Day-of-week headers -->
       <div class="grid grid-cols-7 mb-2">
-        <div v-for="d in DOW_LABELS" :key="d"
+        <div v-for="d in dowLabels" :key="d"
              class="text-center text-xs font-bold text-plum-700/50">{{ d }}</div>
       </div>
 
@@ -48,10 +48,10 @@
       <!-- Selected day events -->
       <div v-if="selectedDay" class="mt-4 space-y-2">
         <h3 class="font-display font-bold text-plum-700">
-          📅 {{ selectedDayStr }}
+          {{ t('calendar.selectedPrefix') }} {{ selectedDayStr }}
         </h3>
         <div v-if="!selectedEvents.length" class="card text-center text-plum-700/40 text-sm py-4">
-          Tidak ada acara khusus 😊
+          {{ t('calendar.noEvents') }}
         </div>
         <div v-for="e in selectedEvents" :key="e.id"
              class="card flex items-start gap-3"
@@ -67,12 +67,12 @@
 
       <!-- Legend -->
       <div class="mt-6 card">
-        <h3 class="font-display font-bold text-plum-700 text-sm mb-2">Keterangan</h3>
+        <h3 class="font-display font-bold text-plum-700 text-sm mb-2">{{ t('calendar.legend') }}</h3>
         <div class="grid grid-cols-2 gap-2">
-          <div v-for="(color, type) in EVENT_COLORS" :key="type"
+          <div v-for="type in eventTypes" :key="type"
                class="flex items-center gap-2 text-xs text-plum-700/70">
-            <span class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: color }" />
-            {{ EVENT_LABEL[type] }}
+            <span class="w-3 h-3 rounded-full flex-shrink-0" :style="{ backgroundColor: EVENT_COLORS[type] }" />
+            {{ t(`events.${type}`) }}
           </div>
         </div>
       </div>
@@ -82,38 +82,33 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCalendarStore, EVENT_COLORS, EVENT_EMOJI } from '@/stores/calendar'
 import type { EventType } from '@/stores/calendar'
 import { nowWIB, todayWIB } from '@/lib/time'
 import PageHeader from '@/components/PageHeader.vue'
 
-const cal  = useCalendarStore()
-const now  = nowWIB()
-const today = todayWIB()
+const { t, tm } = useI18n()
+const cal        = useCalendarStore()
+const now        = nowWIB()
+const today      = todayWIB()
 
 const year  = ref(now.getFullYear())
 const month = ref(now.getMonth() + 1)  // 1-indexed
 
-const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni',
-                'Juli','Agustus','September','Oktober','November','Desember']
-const DOW_LABELS = ['Min','Sen','Sel','Rab','Kam','Jum','Sab']
+// Reactive to locale changes
+const months    = computed(() => tm('calendar.months') as string[])
+const dowLabels = computed(() => tm('days.short') as string[])
 
-const EVENT_LABEL: Record<EventType, string> = {
-  holiday:  'Hari Libur',
-  exam:     'Ujian / Asesmen',
-  report:   'Pengambilan Rapot',
-  event:    'Acara Sekolah',
-  activity: 'Kegiatan',
-}
+const eventTypes: EventType[] = ['holiday', 'exam', 'report', 'event', 'activity']
 
-const daysInMonth = computed(() => {
-  return new Date(year.value, month.value, 0).getDate()
-})
+const daysInMonth = computed(() =>
+  new Date(year.value, month.value, 0).getDate()
+)
 
-const leadingBlanks = computed(() => {
-  // day-of-week the 1st falls on (0=Sun…6=Sat)
-  return new Date(year.value, month.value - 1, 1).getDay()
-})
+const leadingBlanks = computed(() =>
+  new Date(year.value, month.value - 1, 1).getDay()
+)
 
 function eventsForDay(day: number) {
   const str = `${year.value}-${String(month.value).padStart(2,'0')}-${String(day).padStart(2,'0')}`
@@ -124,7 +119,7 @@ const selectedDay = ref<number | null>(null)
 
 const selectedDayStr = computed(() => {
   if (!selectedDay.value) return ''
-  return `${selectedDay.value} ${MONTHS[month.value - 1]} ${year.value}`
+  return `${selectedDay.value} ${months.value[month.value - 1]} ${year.value}`
 })
 
 const selectedEvents = computed(() => {
@@ -137,7 +132,7 @@ function selectDay(day: number) {
 }
 
 function cellClass(day: number) {
-  const str = `${year.value}-${String(month.value).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+  const str    = `${year.value}-${String(month.value).padStart(2,'0')}-${String(day).padStart(2,'0')}`
   const isToday = str === today
   const isHol   = cal.isHoliday(str)
   const hasSel  = selectedDay.value === day
