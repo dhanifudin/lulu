@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -41,12 +41,16 @@ const auth   = useAuthStore()
 const route  = useRoute()
 const router = useRouter()
 
-// After PKCE code exchange, onAuthStateChange fires AFTER the router has
-// already sent the unauthenticated user to /login. Watch isLoggedIn so
-// we navigate away as soon as the session is confirmed.
-watch(() => auth.isLoggedIn, (loggedIn) => {
-  if (loggedIn && route.name === 'login') {
-    router.replace({ name: 'today' })
+// Keep the rendered view in sync with auth state in BOTH directions.
+// Reacting to route.name as well closes the PKCE login race: if isLoggedIn
+// flips before /login finishes navigating, this re-fires once route.name
+// settles to 'login' and then replaces to today. The route.name && guard
+// skips the very first tick before the router has a resolved route name.
+watchEffect(() => {
+  if (auth.isLoggedIn && route.name === 'login') {
+    router.replace({ name: 'today' })           // logged in → enter app
+  } else if (!auth.isLoggedIn && route.name && route.name !== 'login') {
+    router.replace({ name: 'login' })            // logged out → back to login
   }
 })
 </script>
