@@ -47,7 +47,18 @@ function timeToMinutes(t: string): number {
 
 const DOW_ID = ['', 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu']
 
+const CORS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS })
+  }
+
   const url = new URL(req.url)
   let type  = url.searchParams.get('type') ?? 'night'
 
@@ -100,7 +111,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({ type: 'test', sent, stale: staleIds.length }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { 'Content-Type': 'application/json', ...CORS } }
     )
   }
 
@@ -116,7 +127,7 @@ Deno.serve(async (req: Request) => {
   const targetDow     = dayOfWeekWIB(targetDate)
 
   if (targetDow >= 6) {
-    return new Response('Weekend — no reminder', { status: 200 })
+    return new Response('Weekend — no reminder', { status: 200, headers: CORS })
   }
 
   const { data: holidays } = await supabase
@@ -127,7 +138,7 @@ Deno.serve(async (req: Request) => {
     .gte('end_date',   targetDateStr)
 
   if (holidays && holidays.length > 0) {
-    return new Response(`Holiday (${holidays[0].title}) — skipping`, { status: 200 })
+    return new Response(`Holiday (${holidays[0].title}) — skipping`, { status: 200, headers: CORS })
   }
 
   const { data: slots } = await supabase
@@ -265,6 +276,6 @@ Deno.serve(async (req: Request) => {
 
   return new Response(
     JSON.stringify({ type, targetDate: targetDateStr, sent, stale: staleIds.length }),
-    { headers: { 'Content-Type': 'application/json' } }
+    { headers: { 'Content-Type': 'application/json', ...CORS } }
   )
 })
