@@ -140,6 +140,7 @@ export default {
     testSuccess: 'Berhasil! Periksa notifikasimu ✓',
     testFail: 'Gagal mengirim notifikasi ✗',
     testSending: 'Mengirim…',
+    testNoSub: 'Belum berlangganan di perangkat ini — aktifkan dulu',
     enableFirst: 'Aktifkan notifikasi terlebih dahulu',
   },
   settings: {

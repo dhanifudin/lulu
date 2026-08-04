@@ -140,6 +140,7 @@ export default {
     testSuccess: 'Notification sent! ✓',
     testFail: 'Failed to send notification ✗',
     testSending: 'Sending…',
+    testNoSub: 'Not subscribed on this device — toggle on first',
     enableFirst: 'Enable notifications first',
   },
   settings: {

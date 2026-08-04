@@ -18,6 +18,16 @@ declare const self: ServiceWorkerGlobalScope
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
+// Activate immediately and claim all clients so push events are handled
+// by the latest SW version (required with injectManifest + autoUpdate).
+self.addEventListener('install',  () => self.skipWaiting())
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
+
+// Support vite-plugin-pwa autoUpdate: respond to SKIP_WAITING message
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting()
+})
+
 // 2. SPA navigation fallback — all navigations (except /api, /supabase) get index.html
 const spaHandler = createHandlerBoundToURL('/index.html')
 registerRoute(

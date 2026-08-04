@@ -107,17 +107,19 @@ async function sendTest() {
   testing.value   = true
   testLabel.value = t('notifications.testSending')
   try {
-    // Invoke the real edge function so we validate the full push pipeline
-    const { error } = await supabase.functions.invoke('send-reminders', {
+    const { data, error } = await supabase.functions.invoke('send-reminders', {
       body: { type: 'test' },
     })
     if (error) throw error
-    testLabel.value = t('notifications.testSuccess')
+    const sent = (data as { sent?: number })?.sent ?? 0
+    testLabel.value = sent > 0
+      ? t('notifications.testSuccess')
+      : t('notifications.testNoSub')
   } catch {
     testLabel.value = t('notifications.testFail')
   } finally {
     testing.value = false
-    setTimeout(() => { testLabel.value = t('notifications.testBtn') }, 3000)
+    setTimeout(() => { testLabel.value = t('notifications.testBtn') }, 4000)
   }
 }
 
