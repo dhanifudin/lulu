@@ -178,39 +178,76 @@ npx supabase functions deploy send-reminders
 
 ### Step 9 — Set up cron schedules for reminders
 
-Run this SQL in the Supabase **SQL Editor** (replace the two placeholder values):
+Reminders are driven by `pg_cron` calling the `send-reminders` Edge Function via `pg_net`.
+The anon key is stored **once** in Supabase Vault so it never appears in plaintext inside
+`cron.job.command`. Run all of this in the Supabase **SQL Editor**.
 
+**9a. Enable the extensions** (one-time):
 ```sql
--- Night before: 19:00 WIB = 12:00 UTC, Mon–Fri
-select cron.schedule(
-  'lulu-night-reminder',
-  '0 12 * * 1-5',
-  format($$
-    select net.http_post(
-      url := 'https://%s.supabase.co/functions/v1/send-reminders?type=night',
-      headers := jsonb_build_object('Authorization', 'Bearer %s')
-    )
-  $$, 'your-project-ref', 'your-anon-key')
-);
-
--- Early morning: 05:30 WIB = 22:30 UTC previous night, Sun–Thu
-select cron.schedule(
-  'lulu-morning-reminder',
-  '30 22 * * 0-4',
-  format($$
-    select net.http_post(
-      url := 'https://%s.supabase.co/functions/v1/send-reminders?type=morning',
-      headers := jsonb_build_object('Authorization', 'Bearer %s')
-    )
-  $$, 'your-project-ref', 'your-anon-key')
-);
+create extension if not exists pg_cron;
+create extension if not exists pg_net with schema extensions;
 ```
 
-> **Why `0-4` for morning?** 05:30 WIB Monday = 22:30 UTC Sunday. The cron runs Sunday through Thursday so it fires at the right WIB morning for each school day.
-
-Verify cron jobs were created:
+**9b. Store the anon key in Vault** (one-time — replace with your real anon key):
 ```sql
-select jobname, schedule, command from cron.job where jobname like 'lulu%';
+select vault.create_secret('your-anon-key', 'edge_anon_key', 'Anon key for pg_cron edge function calls');
+```
+
+**9c. Schedule the three reminders.** Each reads the key from Vault at runtime. Re-running a
+`cron.schedule` with the same name updates it (idempotent).
+```sql
+-- 🌙 Night before — 19:00 WIB (12:00 UTC), evening before each school day (Sun–Thu)
+select cron.schedule('lulu-reminder-night', '0 12 * * 0-4', $job$
+  select net.http_post(
+    url     := 'https://<project-ref>.supabase.co/functions/v1/send-reminders?type=night',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key'),
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key')),
+    body    := '{}'::jsonb);
+$job$);
+
+-- ☀️ Morning — 05:30 WIB (22:30 UTC prev day), each school day (Sun–Thu UTC = Mon–Fri WIB)
+select cron.schedule('lulu-reminder-morning', '30 22 * * 0-4', $job$
+  select net.http_post(
+    url     := 'https://<project-ref>.supabase.co/functions/v1/send-reminders?type=morning',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key'),
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key')),
+    body    := '{}'::jsonb);
+$job$);
+
+-- 🚗 Pickup — every 5 min 09:00–14:55 WIB (02:00–07:55 UTC), Mon–Fri.
+-- The function gates each user by (school_end − pickup_minutes_before); cron just covers the window.
+select cron.schedule('lulu-reminder-pickup', '*/5 2-7 * * 1-5', $job$
+  select net.http_post(
+    url     := 'https://<project-ref>.supabase.co/functions/v1/send-reminders?type=pickup',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key'),
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key')),
+    body    := '{}'::jsonb);
+$job$);
+```
+
+> **Why `0-4` for night/morning?** 05:30 WIB Monday = 22:30 UTC Sunday; 19:00 WIB targets the next
+> school day. Running Sun–Thu (UTC) fires at the right WIB time for each Mon–Fri school day.
+>
+> **Pickup window** covers `school_end − pickup_minutes_before`. With ends 11:00–14:20 WIB and up to
+> 120 min lead, the earliest fire is 09:00 WIB, so the cron sweeps 09:00–14:55 WIB every 5 min.
+
+**9d. Verify.** Confirm the jobs exist, then fire one manually and read the async response:
+```sql
+select jobid, jobname, schedule, active from cron.job where jobname like 'lulu%';
+
+-- manual smoke test (async — check the response table after a few seconds)
+select net.http_post(
+  url := 'https://<project-ref>.supabase.co/functions/v1/send-reminders?type=test',
+  headers := jsonb_build_object(
+    'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key'),
+    'apikey', (select decrypted_secret from vault.decrypted_secrets where name='edge_anon_key')));
+select status_code, content from net._http_response order by id desc limit 1;  -- expect 200 + {"sent":N,...}
 ```
 
 ---
