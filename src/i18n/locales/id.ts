@@ -8,6 +8,7 @@ export default {
     signOut: 'Keluar',
     save: 'Simpan ✓',
     add: 'Tambah ➕',
+    offline: 'Tidak ada koneksi — menampilkan data tersimpan',
   },
   nav: {
     home: 'Beranda',

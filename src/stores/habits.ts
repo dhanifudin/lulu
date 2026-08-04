@@ -22,28 +22,52 @@ export interface HabitLog {
   completed: boolean
 }
 
+const HABITS_CACHE_KEY = 'lulu-cache-habits-v1'
+
 export const useHabitsStore = defineStore('habits', () => {
   const habits = ref<Habit[]>([])
   const logs = ref<HabitLog[]>([])       // last 30 days
   const loading = ref(false)
 
+  function loadCache(): boolean {
+    try {
+      const raw = localStorage.getItem(HABITS_CACHE_KEY)
+      if (!raw) return false
+      const saved = JSON.parse(raw) as { habits: Habit[]; logs: HabitLog[] }
+      if (saved.habits?.length) habits.value = saved.habits
+      if (saved.logs?.length)   logs.value   = saved.logs
+      return saved.habits?.length > 0
+    } catch { return false }
+  }
+
+  function saveCache() {
+    try {
+      localStorage.setItem(HABITS_CACHE_KEY, JSON.stringify({ habits: habits.value, logs: logs.value }))
+    } catch { /* storage unavailable */ }
+  }
+
   async function fetchAll() {
-    loading.value = true
+    const hasCached = loadCache()
+    loading.value = !hasCached
+
     const today = todayWIB()
-    // Calculate 30 days ago
     const from = new Date(today)
     from.setDate(from.getDate() - 30)
     const fromStr = from.toISOString().slice(0, 10)
 
-    const [habitsRes, logsRes] = await Promise.all([
-      supabase.from('habits').select('*').eq('active', true).order('sort_order'),
-      supabase.from('habit_logs')
-        .select('*')
-        .gte('date', fromStr)
-        .eq('completed', true),
-    ])
-    if (habitsRes.data) habits.value = habitsRes.data
-    if (logsRes.data) logs.value = logsRes.data
+    try {
+      const [habitsRes, logsRes] = await Promise.all([
+        supabase.from('habits').select('*').eq('active', true).order('sort_order'),
+        supabase.from('habit_logs')
+          .select('*')
+          .gte('date', fromStr)
+          .eq('completed', true),
+      ])
+      if (habitsRes.data) habits.value = habitsRes.data
+      if (logsRes.data)   logs.value   = logsRes.data
+      saveCache()
+    } catch { /* offline — cached data already loaded above */ }
+
     loading.value = false
   }
 
@@ -80,21 +104,19 @@ export const useHabitsStore = defineStore('habits', () => {
     const already = isCompletedToday(habitId)
 
     if (already) {
-      // Remove
-      await supabase
-        .from('habit_logs')
-        .delete()
-        .eq('habit_id', habitId)
-        .eq('date', today)
       logs.value = logs.value.filter(l => !(l.habit_id === habitId && l.date === today))
+      saveCache()
+      await supabase.from('habit_logs').delete().eq('habit_id', habitId).eq('date', today)
     } else {
-      // Insert
       const { data } = await supabase
         .from('habit_logs')
         .insert({ habit_id: habitId, date: today, completed: true })
         .select()
         .single()
-      if (data) logs.value.push(data)
+      if (data) {
+        logs.value.push(data)
+        saveCache()
+      }
     }
   }
 

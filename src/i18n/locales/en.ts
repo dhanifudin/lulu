@@ -8,6 +8,7 @@ export default {
     signOut: 'Sign out',
     save: 'Save ✓',
     add: 'Add ➕',
+    offline: 'Offline — showing cached data',
   },
   nav: {
     home: 'Home',

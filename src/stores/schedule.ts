@@ -29,26 +29,56 @@ export interface Uniform {
   color: string
 }
 
+const SCHEDULE_CACHE_KEY = 'lulu-cache-schedule-v1'
+
 export const useScheduleStore = defineStore('schedule', () => {
   const slots = ref<ScheduleSlot[]>([])
   const subjects = ref<Map<string, Subject>>(new Map())
   const uniforms = ref<Map<number, Uniform>>(new Map())
   const loading = ref(false)
 
+  function loadCache(): boolean {
+    try {
+      const raw = localStorage.getItem(SCHEDULE_CACHE_KEY)
+      if (!raw) return false
+      const saved = JSON.parse(raw) as { slots: ScheduleSlot[]; subjects: [string, Subject][]; uniforms: [number, Uniform][] }
+      if (saved.slots?.length)    slots.value    = saved.slots
+      if (saved.subjects?.length) subjects.value = new Map(saved.subjects)
+      if (saved.uniforms?.length) uniforms.value = new Map(saved.uniforms)
+      return saved.slots?.length > 0
+    } catch { return false }
+  }
+
+  function saveCache() {
+    try {
+      localStorage.setItem(SCHEDULE_CACHE_KEY, JSON.stringify({
+        slots:    slots.value,
+        subjects: [...subjects.value.entries()],
+        uniforms: [...uniforms.value.entries()],
+      }))
+    } catch { /* storage unavailable */ }
+  }
+
   async function fetchAll() {
-    loading.value = true
-    const [slotsRes, subjectsRes, uniformsRes] = await Promise.all([
-      supabase.from('schedule_slots').select('*').order('day_of_week').order('start_time'),
-      supabase.from('subjects').select('*'),
-      supabase.from('uniforms').select('*'),
-    ])
-    if (slotsRes.data) slots.value = slotsRes.data
-    if (subjectsRes.data) {
-      subjects.value = new Map(subjectsRes.data.map((s: Subject) => [s.key, s]))
-    }
-    if (uniformsRes.data) {
-      uniforms.value = new Map(uniformsRes.data.map((u: Uniform) => [u.day_of_week, u]))
-    }
+    const hasCached = loadCache()
+    loading.value = !hasCached  // skip spinner if we already have cached data
+
+    try {
+      const [slotsRes, subjectsRes, uniformsRes] = await Promise.all([
+        supabase.from('schedule_slots').select('*').order('day_of_week').order('start_time'),
+        supabase.from('subjects').select('*'),
+        supabase.from('uniforms').select('*'),
+      ])
+      if (slotsRes.data) slots.value = slotsRes.data
+      if (subjectsRes.data) {
+        subjects.value = new Map(subjectsRes.data.map((s: Subject) => [s.key, s]))
+      }
+      if (uniformsRes.data) {
+        uniforms.value = new Map(uniformsRes.data.map((u: Uniform) => [u.day_of_week, u]))
+      }
+      saveCache()
+    } catch { /* offline — cached data already loaded above */ }
+
     loading.value = false
   }
 

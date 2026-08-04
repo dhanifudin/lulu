@@ -1,5 +1,10 @@
 <template>
   <div class="min-h-screen bg-cream">
+    <!-- Offline banner -->
+    <div v-if="!isOnline" class="fixed top-0 inset-x-0 z-50 bg-amber-400 text-amber-900 text-center text-xs py-1 font-semibold tracking-wide">
+      {{ t('common.offline') }}
+    </div>
+
     <!-- Auth loading splash -->
     <div v-if="auth.loading" class="min-h-screen flex items-center justify-center flower-bg">
       <div class="text-center">
@@ -30,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { watchEffect } from 'vue'
+import { ref, onMounted, onUnmounted, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -40,6 +45,18 @@ const { t }  = useI18n()
 const auth   = useAuthStore()
 const route  = useRoute()
 const router = useRouter()
+
+const isOnline = ref(navigator.onLine)
+function onOnline()  { isOnline.value = true }
+function onOffline() { isOnline.value = false }
+onMounted(() => {
+  window.addEventListener('online',  onOnline)
+  window.addEventListener('offline', onOffline)
+})
+onUnmounted(() => {
+  window.removeEventListener('online',  onOnline)
+  window.removeEventListener('offline', onOffline)
+})
 
 // Keep the rendered view in sync with auth state in BOTH directions.
 // Reacting to route.name as well closes the PKCE login race: if isLoggedIn

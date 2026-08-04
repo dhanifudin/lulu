@@ -11,6 +11,9 @@
 
 import { precacheAndRoute, createHandlerBoundToURL, cleanupOutdatedCaches } from 'workbox-precaching'
 import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies'
+import { ExpirationPlugin } from 'workbox-expiration'
+import { CacheableResponsePlugin } from 'workbox-cacheable-response'
 
 declare const self: ServiceWorkerGlobalScope
 
@@ -33,6 +36,24 @@ const spaHandler = createHandlerBoundToURL('/index.html')
 registerRoute(
   new NavigationRoute(spaHandler, {
     denylist: [/^\/api\//, /^\/supabase\//],
+  })
+)
+
+// 3. Google Fonts stylesheet — stale-while-revalidate (tiny, changes rarely)
+registerRoute(
+  ({ url }) => url.origin === 'https://fonts.googleapis.com',
+  new StaleWhileRevalidate({ cacheName: 'lulu-fonts-css' })
+)
+
+// 4. Google Font files — cache-first, 1 year (content-addressed, immutable)
+registerRoute(
+  ({ url }) => url.origin === 'https://fonts.gstatic.com',
+  new CacheFirst({
+    cacheName: 'lulu-fonts-files',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxAgeSeconds: 365 * 24 * 60 * 60, maxEntries: 30 }),
+    ],
   })
 )
 
