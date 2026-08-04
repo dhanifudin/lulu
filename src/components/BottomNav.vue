@@ -8,10 +8,10 @@
           v-for="tab in tabs"
           :key="tab.to"
           :to="tab.to"
-          class="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] rounded-2xl transition-all duration-200 select-none"
+          class="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 min-h-[56px] rounded-2xl transition-all duration-200 select-none active:bg-pink-50"
           :class="isActive(tab.to)
             ? 'text-pink-500 bg-pink-50 shadow-sm'
-            : 'text-plum-700/45 hover:text-pink-400 hover:bg-pink-50/50 active:bg-pink-50'"
+            : 'text-plum-700/45 hover:text-pink-400 hover:bg-pink-50/50'"
         >
           <span class="text-2xl leading-none"
                 :class="isActive(tab.to) ? 'scale-110' : 'scale-100'"
@@ -37,12 +37,12 @@ import { RouterLink, useRoute } from 'vue-router'
 const { t } = useI18n()
 const route = useRoute()
 
+// 4 tabs — Settings is in the header ⚙️
 const tabs = [
   { to: '/',         icon: '🏠', labelKey: 'nav.home'     },
   { to: '/schedule', icon: '📅', labelKey: 'nav.schedule' },
-  { to: '/habits',   icon: '⭐', labelKey: 'nav.habits'   },
-  { to: '/calendar', icon: '🌸', labelKey: 'nav.calendar' },
-  { to: '/settings', icon: '⚙️', labelKey: 'nav.settings' },
+  { to: '/habits',   icon: '🌸', labelKey: 'nav.habits'   },
+  { to: '/calendar', icon: '🗓️', labelKey: 'nav.calendar' },
 ]
 
 function isActive(path: string): boolean {

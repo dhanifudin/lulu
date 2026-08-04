@@ -20,22 +20,23 @@
 
       <!-- ── KPI Summary Strip ── -->
       <div class="grid grid-cols-4 gap-1.5">
-        <div class="card-pink text-center py-2.5 px-1">
-          <p class="font-display font-bold text-pink-500 text-xl leading-none">{{ doneCount }}/{{ habits.habits.length }}</p>
-          <p class="text-[10px] text-plum-700/60 leading-tight mt-1">{{ t('home.kpiDoneToday') }}</p>
+        <div class="card-pink text-center py-2.5 px-1 min-w-0">
+          <p class="font-display font-bold text-pink-500 text-xl leading-none tabular-nums truncate">{{ doneCount }}/{{ habits.habits.length }}</p>
+          <p class="text-xs text-plum-700/60 leading-tight mt-1">{{ t('home.kpiDoneToday') }}</p>
         </div>
-        <div class="card-pink text-center py-2.5 px-1">
-          <p class="font-display font-bold text-lavender-400 text-xl leading-none">{{ weekCompletionPct }}%</p>
-          <p class="text-[10px] text-plum-700/60 leading-tight mt-1">{{ t('home.kpiWeekPct') }}</p>
+        <div class="card-pink text-center py-2.5 px-1 min-w-0">
+          <p class="font-display font-bold text-lavender-400 text-xl leading-none tabular-nums truncate">{{ weekCompletionPct }}%</p>
+          <p class="text-xs text-plum-700/60 leading-tight mt-1">{{ t('home.kpiWeekPct') }}</p>
         </div>
-        <div class="card-pink text-center py-2.5 px-1">
-          <p class="font-display font-bold text-orange-400 text-xl leading-none">🔥{{ maxStreak }}</p>
-          <p class="text-[10px] text-plum-700/60 leading-tight mt-1">{{ t('home.kpiStreak') }}</p>
+        <div class="card-pink text-center py-2.5 px-1 min-w-0">
+          <p class="font-display font-bold text-orange-400 text-xl leading-none tabular-nums truncate">🔥{{ maxStreak }}</p>
+          <p class="text-xs text-plum-700/60 leading-tight mt-1">{{ t('home.kpiStreak') }}</p>
         </div>
-        <div class="card-pink text-center py-2.5 px-1">
-          <p class="font-display font-bold text-pink-400 text-xl leading-none">⭐{{ totalStars }}</p>
-          <p class="text-[10px] text-plum-700/60 leading-tight mt-1">{{ t('home.kpiStars') }}</p>
-        </div>
+        <RouterLink to="/rewards"
+                    class="card-pink text-center py-2.5 px-1 min-w-0 block active:scale-95 transition-transform">
+          <p class="font-display font-bold text-pink-400 text-xl leading-none tabular-nums truncate">🌸{{ totalStars }}</p>
+          <p class="text-xs text-plum-700/60 leading-tight mt-1">{{ t('home.kpiStars') }}</p>
+        </RouterLink>
       </div>
 
       <!-- ── Upcoming Exams & Events ── -->

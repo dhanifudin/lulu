@@ -67,8 +67,18 @@ export const useRewardsStore = defineStore('rewards', () => {
     return false
   }
 
+  async function addReward(data: { name_id: string; name_en: string; emoji: string; star_cost: number }) {
+    const maxOrder = rewards.value.reduce((m, r) => Math.max(m, r.sort_order), 0)
+    const { data: created } = await supabase
+      .from('rewards')
+      .insert({ ...data, active: true, sort_order: maxOrder + 1 })
+      .select()
+      .single()
+    if (created) rewards.value.push(created as Reward)
+  }
+
   return {
     rewards, redemptions, totalStarsEarned, starsBalance, starsSpent, loading,
-    fetchAll, redeem,
+    fetchAll, redeem, addReward,
   }
 })

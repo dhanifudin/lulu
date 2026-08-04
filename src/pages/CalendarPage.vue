@@ -6,11 +6,11 @@
 
       <!-- Month navigation -->
       <div class="flex items-center justify-between mt-3">
-        <button @click="prevMonth" class="btn-secondary px-4 py-2 text-sm">‹</button>
+        <button @click="prevMonth" class="btn-secondary min-w-[44px] min-h-[44px] text-lg px-3">‹</button>
         <span class="font-display font-bold text-pink-500 text-lg">
           {{ months[month - 1] }} {{ year }}
         </span>
-        <button @click="nextMonth" class="btn-secondary px-4 py-2 text-sm">›</button>
+        <button @click="nextMonth" class="btn-secondary min-w-[44px] min-h-[44px] text-lg px-3">›</button>
       </div>
     </AppHeader>
 
@@ -35,15 +35,19 @@
           v-for="day in daysInMonth"
           :key="day"
           @click="selectDay(day)"
-          class="aspect-square flex flex-col items-center justify-start pt-1 rounded-2xl text-sm font-semibold transition-all duration-150 relative"
+          class="aspect-square flex flex-col items-center justify-start pt-1 rounded-2xl text-sm font-semibold transition-all duration-150 active:scale-95 relative"
           :class="cellClass(day)"
         >
           <span>{{ day }}</span>
-          <!-- Event dots -->
-          <div class="flex gap-0.5 mt-0.5 flex-wrap justify-center">
+          <!-- Event dots (max 3 visible + +N overflow marker) -->
+          <div class="flex gap-0.5 mt-0.5 flex-wrap justify-center items-center">
             <span v-for="e in eventsForDay(day).slice(0,3)" :key="e.id"
-                  class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                  class="w-2 h-2 rounded-full flex-shrink-0"
                   :style="{ backgroundColor: EVENT_COLORS[e.type] }" />
+            <span v-if="eventsForDay(day).length > 3"
+                  class="text-[8px] font-bold text-plum-700/60 leading-none">
+              +{{ eventsForDay(day).length - 3 }}
+            </span>
           </div>
         </button>
       </div>
@@ -63,7 +67,7 @@
           <div>
             <p class="font-semibold text-plum-700 text-sm">{{ e.title }}</p>
             <p v-if="e.description" class="text-xs text-plum-700/60 mt-0.5">{{ e.description }}</p>
-            <p class="text-xs text-plum-700/40 mt-1">{{ e.start_date }} – {{ e.end_date }}</p>
+            <p class="text-xs text-plum-700/60 mt-1">{{ e.start_date }} – {{ e.end_date }}</p>
           </div>
         </div>
       </div>

@@ -9,9 +9,16 @@
         <h1 class="font-display font-bold text-plum-700 text-xl leading-tight">{{ title }}</h1>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
-        <LangToggle />
+        <!-- Settings link (replaces language toggle — language is now in Settings) -->
+        <RouterLink to="/settings"
+          class="min-w-[40px] min-h-[40px] flex items-center justify-center text-xl text-plum-700/50
+                 hover:text-pink-500 active:scale-90 transition-all duration-150 rounded-xl">
+          ⚙️
+        </RouterLink>
         <button @click="auth.signOut()"
-                class="text-xs font-semibold bg-white/60 hover:bg-pink-50 text-plum-700/50 hover:text-pink-500 rounded-xl px-3 py-2 transition-all active:scale-95 border border-pink-100">
+                class="text-xs font-semibold bg-white/60 hover:bg-pink-50 text-plum-700/50
+                       hover:text-pink-500 rounded-xl px-3 min-h-[40px] transition-all active:scale-95
+                       border border-pink-100">
           {{ t('common.signOut') }}
         </button>
       </div>
@@ -28,12 +35,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { nowWIB, currentTimeWIB, formatLongDate } from '@/lib/time'
 import PageHeader from '@/components/PageHeader.vue'
-import LangToggle from '@/components/LangToggle.vue'
 
 defineProps<{ title: string }>()
 
@@ -45,7 +52,8 @@ const firstName = computed(() => auth.userName.split(' ')[0])
 // Locale-aware long date, recomputed when language toggles
 const localizedDate = computed(() => formatLongDate(nowWIB(), locale.value))
 
-// Live clock, updates every 30 s
+// Live clock, updates every 30 s — cleared on unmount to avoid leak
 const currentTimeDisplay = ref(currentTimeWIB())
-setInterval(() => { currentTimeDisplay.value = currentTimeWIB() }, 30_000)
+const clockInterval = setInterval(() => { currentTimeDisplay.value = currentTimeWIB() }, 30_000)
+onUnmounted(() => clearInterval(clockInterval))
 </script>

@@ -20,29 +20,36 @@
 
       <template v-else>
         <!-- Subscribe toggle -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-4">
           <span class="text-sm font-semibold text-plum-700">{{ t('notifications.activeLabel') }}</span>
           <button @click="toggleSubscription"
-                  class="relative w-14 h-8 rounded-full transition-colors duration-200 flex-shrink-0"
-                  :class="store.subscribed ? 'bg-pink-300' : 'bg-gray-200'"
-                  style="min-width: 56px; min-height: 32px;">
-            <span class="absolute top-1 h-6 w-6 bg-white rounded-full shadow transition-transform duration-200"
-                  :class="store.subscribed ? 'translate-x-7' : 'translate-x-1'" />
+                  class="relative flex-shrink-0 rounded-full transition-colors duration-200 active:opacity-80"
+                  style="width:56px; min-width:56px; height:44px; display:flex; align-items:center"
+                  :class="store.subscribed ? 'bg-pink-300' : 'bg-gray-200'">
+            <span class="absolute left-1 h-7 w-7 bg-white rounded-full shadow transition-transform duration-200"
+                  :class="store.subscribed ? 'translate-x-[28px]' : 'translate-x-0'" />
           </button>
         </div>
 
-        <template v-if="store.subscribed">
-          <!-- Test button — near the top so it's easy to find -->
-          <button @click="sendTest" :disabled="testing"
-                  class="w-full flex items-center justify-center gap-2 rounded-2xl border border-pink-200 bg-pink-50 hover:bg-pink-100 text-pink-600 font-semibold text-sm py-2.5 transition-all active:scale-95 disabled:opacity-50">
-            <span v-if="testing" class="text-base animate-spin">🌸</span>
-            <span v-else class="text-base">🔔</span>
-            {{ testLabel }}
-          </button>
+        <!-- Test button (always visible when permission granted) -->
+        <button @click="sendTest" :disabled="testing"
+                class="w-full flex items-center justify-center gap-2 rounded-2xl border border-pink-200
+                       bg-pink-50 hover:bg-pink-100 text-pink-600 font-semibold text-sm
+                       py-3 transition-all active:scale-95 disabled:opacity-50 min-h-[48px]">
+          <span v-if="testing" class="text-base animate-spin">🌸</span>
+          <span v-else class="text-base">🔔</span>
+          {{ testLabel }}
+        </button>
+
+        <!-- Reminder settings — always visible but dimmed until subscribed -->
+        <div :class="{ 'opacity-40 pointer-events-none': !store.subscribed }">
+          <p v-if="!store.subscribed" class="text-xs text-plum-700/60 mb-3">
+            {{ t('notifications.enableFirst') }}
+          </p>
 
           <!-- Night before -->
-          <div class="space-y-2">
-            <label class="flex items-center gap-3 cursor-pointer py-1">
+          <div class="space-y-2 mb-4">
+            <label class="flex items-center gap-3 cursor-pointer min-h-[44px]">
               <input type="checkbox" v-model="nightEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.nightLabel') }}</span>
@@ -51,8 +58,8 @@
           </div>
 
           <!-- Morning -->
-          <div class="space-y-2">
-            <label class="flex items-center gap-3 cursor-pointer py-1">
+          <div class="space-y-2 mb-4">
+            <label class="flex items-center gap-3 cursor-pointer min-h-[44px]">
               <input type="checkbox" v-model="morningEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.morningLabel') }}</span>
@@ -60,9 +67,9 @@
             <input v-if="morningEnabled" type="time" v-model="morningTime" class="input" />
           </div>
 
-          <!-- Pickup reminder -->
+          <!-- Pickup reminder — always shown so it's discoverable -->
           <div class="space-y-2">
-            <label class="flex items-center gap-3 cursor-pointer py-1">
+            <label class="flex items-center gap-3 cursor-pointer min-h-[44px]">
               <input type="checkbox" v-model="pickupEnabled"
                      class="w-5 h-5 rounded accent-pink-400 flex-shrink-0" />
               <span class="text-sm font-semibold text-plum-700">{{ t('notifications.pickupLabel') }}</span>
@@ -75,9 +82,9 @@
               <span class="text-sm text-plum-700/60">{{ t('notifications.pickupMinutes') }}</span>
             </div>
           </div>
+        </div>
 
-          <button @click="save" class="btn-secondary w-full">{{ t('notifications.save') }}</button>
-        </template>
+        <button @click="save" class="btn-secondary w-full">{{ t('notifications.save') }}</button>
       </template>
     </template>
   </div>
@@ -87,6 +94,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNotificationsStore } from '@/stores/notifications'
+import { supabase } from '@/lib/supabase'
 
 const { t }  = useI18n()
 const store  = useNotificationsStore()
@@ -97,16 +105,13 @@ const testLabel = ref(t('notifications.testBtn'))
 
 async function sendTest() {
   testing.value   = true
-  testLabel.value = t('notifications.testBtn')
+  testLabel.value = t('notifications.testSending')
   try {
-    const reg = await navigator.serviceWorker.ready
-    await reg.showNotification(t('notifications.testTitle'), {
-      body:  t('notifications.testBody'),
-      icon:  '/flower-192.png',
-      badge: '/flower-192.png',
-      tag:   'lulu-test',
-      data:  { url: '/' },
+    // Invoke the real edge function so we validate the full push pipeline
+    const { error } = await supabase.functions.invoke('send-reminders', {
+      body: { type: 'test' },
     })
+    if (error) throw error
     testLabel.value = t('notifications.testSuccess')
   } catch {
     testLabel.value = t('notifications.testFail')
@@ -146,11 +151,11 @@ async function toggleSubscription() {
 
 async function save() {
   await store.savePrefs({
-    night_before_enabled: nightEnabled.value,
-    night_before_time:    nightTime.value,
-    morning_enabled:      morningEnabled.value,
-    morning_time:         morningTime.value,
-    pickup_enabled:       pickupEnabled.value,
+    night_before_enabled:  nightEnabled.value,
+    night_before_time:     nightTime.value,
+    morning_enabled:       morningEnabled.value,
+    morning_time:          morningTime.value,
+    pickup_enabled:        pickupEnabled.value,
     pickup_minutes_before: pickupMinutes.value,
   })
 }

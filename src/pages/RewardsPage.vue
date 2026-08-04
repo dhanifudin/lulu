@@ -2,25 +2,31 @@
   <div class="min-h-screen bg-cream pb-28">
 
     <!-- Back-nav header -->
-    <header class="sticky top-0 z-20 bg-cream/95 backdrop-blur border-b border-pink-100">
+    <header class="sticky z-20 bg-cream/95 backdrop-blur border-b border-pink-100"
+            style="top: env(safe-area-inset-top, 0px)">
       <div class="page flex items-center gap-3 py-3">
         <button @click="router.back()"
-                class="text-2xl text-pink-400 active:scale-90 transition-transform select-none leading-none">
+                class="min-w-[44px] min-h-[44px] flex items-center justify-center
+                       text-2xl text-pink-400 active:scale-90 transition-transform select-none leading-none">
           ←
         </button>
         <h1 class="font-display font-bold text-plum-700 text-xl flex-1">{{ t('rewards.title') }}</h1>
-        <LangToggle />
+        <RouterLink to="/settings"
+                    class="min-w-[44px] min-h-[44px] flex items-center justify-center
+                           text-2xl text-plum-700/60 hover:text-plum-700 active:scale-90 transition-all select-none">
+          ⚙️
+        </RouterLink>
       </div>
     </header>
 
     <div class="page pt-4 space-y-6">
 
-      <!-- Stars balance hero -->
+      <!-- Flower balance hero -->
       <div class="card-pink text-center py-6">
-        <p class="font-display font-bold text-yellow-400 leading-none"
-           style="font-size: 4rem">⭐ {{ rewardsStore.starsBalance }}</p>
+        <p class="font-display font-bold text-pink-400 leading-none tabular-nums"
+           style="font-size: clamp(2.5rem, 14vw, 4rem)">🌸 {{ rewardsStore.starsBalance }}</p>
         <p class="text-sm font-semibold text-plum-700/70 mt-2">{{ t('rewards.available') }}</p>
-        <p v-if="rewardsStore.starsSpent > 0" class="text-xs text-plum-700/40 mt-1">
+        <p v-if="rewardsStore.starsSpent > 0" class="text-xs text-plum-700/60 mt-1">
           {{ t('rewards.totalEarned', { n: rewardsStore.totalStarsEarned }) }}
           · {{ t('rewards.totalSpent', { n: rewardsStore.starsSpent }) }}
         </p>
@@ -33,7 +39,16 @@
 
         <!-- Reward shop -->
         <div>
-          <h2 class="font-display font-bold text-plum-700 text-base mb-3">{{ t('rewards.shop') }}</h2>
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-display font-bold text-plum-700 text-base">{{ t('rewards.shop') }}</h2>
+            <button @click="showAddModal = true"
+                    class="flex items-center gap-1 rounded-2xl bg-pink-100 hover:bg-pink-200
+                           active:bg-pink-300 text-pink-600 font-semibold text-sm px-3 py-2
+                           min-h-[40px] transition-all active:scale-95 select-none">
+              ＋ {{ t('rewards.addBtn') }}
+            </button>
+          </div>
+
           <div class="grid grid-cols-2 gap-3">
             <div
               v-for="reward in rewardsStore.rewards"
@@ -45,7 +60,7 @@
               <p class="font-semibold text-plum-700 text-sm leading-snug">
                 {{ locale === 'id' ? reward.name_id : reward.name_en }}
               </p>
-              <p class="text-sm font-bold text-yellow-500">⭐ {{ reward.star_cost }}</p>
+              <p class="text-sm font-bold text-pink-500">🌸 {{ reward.star_cost }}</p>
 
               <!-- Two-step confirm -->
               <template v-if="confirmingId === reward.id">
@@ -56,7 +71,7 @@
                   {{ t('rewards.confirmYes') }}
                 </button>
                 <button @click="confirmingId = null"
-                        class="text-xs text-plum-700/40 py-1">
+                        class="text-xs text-plum-700/60 py-2 min-h-[44px] w-full">
                   {{ t('rewards.confirmNo') }}
                 </button>
               </template>
@@ -88,12 +103,12 @@
                 <p class="font-semibold text-plum-700 text-sm truncate">
                   {{ locale === 'id' ? (r.reward?.name_id ?? '') : (r.reward?.name_en ?? '') }}
                 </p>
-                <p class="text-xs text-plum-700/50 mt-0.5">
+                <p class="text-xs text-plum-700/60 mt-0.5">
                   {{ formatLongDate(new Date(r.redeemed_at), locale) }}
                 </p>
               </div>
-              <span class="text-xs font-bold text-yellow-500 flex-shrink-0">
-                −⭐{{ r.stars_spent }}
+              <span class="text-xs font-bold text-pink-500 flex-shrink-0 tabular-nums">
+                −🌸{{ r.stars_spent }}
               </span>
             </div>
           </div>
@@ -101,6 +116,9 @@
 
       </template>
     </div>
+
+    <!-- Add reward modal -->
+    <RewardAddModal :show="showAddModal" @close="showAddModal = false" @add="onAddReward" />
   </div>
 </template>
 
@@ -110,13 +128,14 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useRewardsStore, type Reward } from '@/stores/rewards'
 import { formatLongDate } from '@/lib/time'
-import LangToggle from '@/components/LangToggle.vue'
+import RewardAddModal from '@/components/RewardAddModal.vue'
 
 const { t, locale } = useI18n()
 const router = useRouter()
 const rewardsStore = useRewardsStore()
 
 const confirmingId = ref<string | null>(null)
+const showAddModal = ref(false)
 
 function startRedeem(reward: Reward) {
   if (rewardsStore.starsBalance < reward.star_cost) return
@@ -126,6 +145,11 @@ function startRedeem(reward: Reward) {
 async function doRedeem(reward: Reward) {
   await rewardsStore.redeem(reward.id)
   confirmingId.value = null
+}
+
+async function onAddReward(data: { name_id: string; name_en: string; emoji: string; star_cost: number }) {
+  await rewardsStore.addReward(data)
+  showAddModal.value = false
 }
 
 onMounted(() => rewardsStore.fetchAll())

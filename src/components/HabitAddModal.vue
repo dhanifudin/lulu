@@ -7,34 +7,31 @@
         <Transition name="slide-up">
           <div v-if="show"
                class="relative z-10 w-full max-w-lg bg-white rounded-t-3xl px-5 pt-5 pb-8 space-y-4"
-               style="max-height: 90dvh; overflow-y: auto;">
+               style="max-height: 90dvh; overflow-y: auto; padding-bottom: max(2rem, env(safe-area-inset-bottom))">
 
             <!-- Handle bar -->
             <div class="w-12 h-1.5 bg-pink-200 rounded-full mx-auto mb-2" />
 
             <h3 class="font-display font-bold text-plum-700 text-lg">{{ t('habits.addTitle') }}</h3>
 
-            <input v-model="newEmoji"   :placeholder="t('habits.emojiPlaceholder')"  class="input" />
-            <input v-model="newNameId"  :placeholder="t('habits.namePlaceholder')"   class="input" />
-            <input v-model="newNameEn"  :placeholder="t('habits.nameEnPlaceholder')" class="input" />
+            <!-- Emoji picker -->
+            <EmojiField v-model="newEmoji" />
+
+            <!-- Names -->
+            <input v-model="newNameId" :placeholder="t('habits.namePlaceholder')" class="input" />
+            <input v-model="newNameEn" :placeholder="t('habits.nameEnPlaceholder')" class="input" />
 
             <!-- Time window -->
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="text-xs font-semibold text-plum-700/60 mb-1.5 block">{{ t('habits.startLabel') }}</label>
-                <input type="time" v-model="newStartTime" class="input" />
-              </div>
-              <div>
-                <label class="text-xs font-semibold text-plum-700/60 mb-1.5 block">{{ t('habits.endLabel') }}</label>
-                <input type="time" v-model="newEndTime" class="input" />
-              </div>
+              <TimeWheel v-model="newStartTime" :label="t('habits.startLabel')" />
+              <TimeWheel v-model="newEndTime"   :label="t('habits.endLabel')" />
             </div>
 
             <button @click="onAdd" :disabled="!newNameId.trim()" class="btn-primary">
               {{ t('habits.addBtn') }}
             </button>
 
-            <button @click="emit('close')" class="w-full text-center text-sm text-plum-700/40 py-1">
+            <button @click="emit('close')" class="w-full text-center text-sm text-plum-700/40 py-2">
               {{ t('habits.cancelBtn') }}
             </button>
           </div>
@@ -48,6 +45,8 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Habit } from '@/stores/habits'
+import EmojiField from '@/components/EmojiField.vue'
+import TimeWheel  from '@/components/TimeWheel.vue'
 
 const props = defineProps<{ show: boolean }>()
 const emit = defineEmits<{
@@ -57,20 +56,20 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const newEmoji     = ref('⭐')
+const newEmoji     = ref('🌸')
 const newNameId    = ref('')
 const newNameEn    = ref('')
-const newStartTime = ref('')
-const newEndTime   = ref('')
+const newStartTime = ref<string | null>(null)
+const newEndTime   = ref<string | null>(null)
 
 // Clear form whenever modal opens
 watch(() => props.show, (val) => {
   if (val) {
-    newEmoji.value     = '⭐'
+    newEmoji.value     = '🌸'
     newNameId.value    = ''
     newNameEn.value    = ''
-    newStartTime.value = ''
-    newEndTime.value   = ''
+    newStartTime.value = null
+    newEndTime.value   = null
   }
 })
 
@@ -79,9 +78,9 @@ function onAdd() {
   emit('add', {
     name_id:    newNameId.value.trim(),
     name_en:    newNameEn.value.trim() || newNameId.value.trim(),
-    emoji:      newEmoji.value || '⭐',
-    start_time: newStartTime.value || null,
-    end_time:   newEndTime.value   || null,
+    emoji:      newEmoji.value || '🌸',
+    start_time: newStartTime.value,
+    end_time:   newEndTime.value,
   })
 }
 </script>

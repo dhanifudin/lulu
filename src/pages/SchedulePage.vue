@@ -6,16 +6,17 @@
     </AppHeader>
 
     <!-- Day tabs -->
-    <div class="sticky top-0 z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100">
+    <div class="sticky z-10 bg-cream/95 backdrop-blur py-2 overflow-x-auto no-scrollbar border-b border-pink-100"
+         style="top: env(safe-area-inset-top, 0px)">
       <div class="flex gap-2 max-w-lg mx-auto px-3">
         <button
           v-for="(day, i) in schoolDays"
           :key="day.dow"
           @click="activeDay = day.dow"
-          class="flex-shrink-0 px-4 py-2 rounded-2xl text-sm font-display font-bold transition-all duration-150"
+          class="flex-shrink-0 px-4 rounded-2xl text-sm font-display font-bold transition-all duration-150 min-h-[44px]"
           :class="activeDay === day.dow
             ? 'bg-pink-300 text-white shadow-flower scale-105'
-            : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100'"
+            : 'bg-pink-50 text-plum-700/70 hover:bg-pink-100 active:bg-pink-100'"
         >
           {{ weekdayShort[i] }}
         </button>

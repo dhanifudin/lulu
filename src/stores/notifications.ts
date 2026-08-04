@@ -32,7 +32,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const subscribed = ref(false)
 
   async function fetchPrefs() {
-    const { data } = await supabase.from('notification_prefs').select('*').maybeSingle()
+    const authStore = useAuthStore()
+    const { data } = await supabase
+      .from('notification_prefs')
+      .select('*')
+      .eq('user_id', authStore.user?.id)
+      .maybeSingle()
     if (data) prefs.value = data
   }
 

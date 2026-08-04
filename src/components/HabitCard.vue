@@ -1,5 +1,5 @@
 <template>
-  <div class="card flex items-center gap-4 animate-pop cursor-pointer"
+  <div class="card flex items-center gap-4 animate-pop cursor-pointer transition-transform active:scale-[0.98]"
        @click="emit('edit', habit)">
     <!-- Check circle (stop propagation so it doesn't open the editor) -->
     <button
@@ -19,7 +19,7 @@
         {{ habit.emoji }} {{ displayName }}
       </p>
       <!-- Time window -->
-      <p v-if="timeLabel" class="text-xs text-plum-700/45 mt-0.5">🕐 {{ timeLabel }}</p>
+      <p v-if="timeLabel" class="text-xs text-plum-700/60 mt-0.5">🕐 {{ timeLabel }}</p>
 
       <!-- Week grid: last 7 days -->
       <div class="flex gap-1 mt-2">
@@ -28,15 +28,14 @@
           :key="i"
           class="w-5 h-5 rounded-md transition-colors duration-150"
           :class="day ? 'bg-pink-300' : 'bg-pink-100'"
-          :title="dayLabels[i]"
         />
       </div>
     </div>
 
-    <!-- Stars & streak -->
+    <!-- Flowers & streak -->
     <div class="flex-shrink-0 text-right">
-      <p class="font-display font-bold text-pink-400 text-lg leading-none">
-        ⭐ {{ stars }}
+      <p class="font-display font-bold text-pink-400 text-lg leading-none tabular-nums">
+        🌸 {{ stars }}
       </p>
       <p v-if="currentStreak > 0" class="text-xs text-orange-400 font-semibold mt-1">
         {{ t('habits.streakDays', { n: currentStreak }) }}
@@ -63,19 +62,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{ toggle: [id: string]; edit: [habit: Habit] }>()
 
-const { t, tm } = useI18n()
+const { t } = useI18n()
 const { pick }  = useDisplayName()
 
 const displayName = computed(() => pick(props.habit.name_id, props.habit.name_en))
-
-// Last 7 day short labels (reactive to locale changes)
-const dayLabels = computed(() => {
-  const shorts = tm('days.short') as string[]
-  const today  = new Date()
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today)
-    d.setDate(d.getDate() - (6 - i))
-    return shorts[d.getDay()]
-  })
-})
 </script>
