@@ -39,13 +39,18 @@
             <!-- bottom spacer -->
             <div class="h-[44px] flex-shrink-0" />
           </div>
-          <!-- highlight band (pointer-events-none so scroll works through it) -->
+          <!-- highlight band -->
           <div class="pointer-events-none absolute inset-x-0 top-[44px] h-[44px]
-                      bg-pink-50 border-y-2 border-pink-200" />
+                      bg-pink-200/60 border-y-2 border-pink-400 rounded-lg" />
+          <!-- top + bottom fade to dim non-selected rows -->
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-[44px] rounded-t-2xl"
+               style="background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.1))" />
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[44px] rounded-b-2xl"
+               style="background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0.1))" />
         </div>
 
         <!-- Colon separator -->
-        <span class="font-display font-bold text-2xl text-plum-700/50 select-none flex-shrink-0">:</span>
+        <span class="font-display font-bold text-2xl text-plum-700 select-none flex-shrink-0">:</span>
 
         <!-- Minute column -->
         <div class="flex-1 relative">
@@ -66,7 +71,11 @@
             <div class="h-[44px] flex-shrink-0" />
           </div>
           <div class="pointer-events-none absolute inset-x-0 top-[44px] h-[44px]
-                      bg-pink-50 border-y-2 border-pink-200" />
+                      bg-pink-200/60 border-y-2 border-pink-400 rounded-lg" />
+          <div class="pointer-events-none absolute inset-x-0 top-0 h-[44px] rounded-t-2xl"
+               style="background: linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.1))" />
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 h-[44px] rounded-b-2xl"
+               style="background: linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0.1))" />
         </div>
 
       </div>
