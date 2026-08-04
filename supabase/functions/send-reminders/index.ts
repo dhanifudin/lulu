@@ -88,7 +88,9 @@ Deno.serve(async (req: Request) => {
       .from('push_subscriptions')
       .select('id, endpoint, p256dh, auth')
 
+    const subsFound = subs?.length ?? 0
     const staleIds: string[] = []
+    const pushErrors: string[] = []
     let sent = 0
 
     for (const sub of (subs ?? [])) {
@@ -102,6 +104,7 @@ Deno.serve(async (req: Request) => {
       } catch (err: unknown) {
         const status = (err as { statusCode?: number }).statusCode
         if (status === 404 || status === 410) staleIds.push(sub.id)
+        else pushErrors.push(`${status}: ${(err as Error).message ?? String(err)}`)
       }
     }
 
@@ -110,7 +113,7 @@ Deno.serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ type: 'test', sent, stale: staleIds.length }),
+      JSON.stringify({ type: 'test', sent, subsFound, stale: staleIds.length, pushErrors }),
       { headers: { 'Content-Type': 'application/json', ...CORS } }
     )
   }

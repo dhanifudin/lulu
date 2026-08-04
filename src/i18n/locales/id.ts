@@ -141,6 +141,7 @@ export default {
     testFail: 'Gagal mengirim notifikasi ✗',
     testSending: 'Mengirim…',
     testNoSub: 'Belum berlangganan di perangkat ini — aktifkan dulu',
+    testPushFailed: 'Berlangganan ada tapi pengiriman push gagal ✗',
     enableFirst: 'Aktifkan notifikasi terlebih dahulu',
   },
   settings: {

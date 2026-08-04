@@ -69,13 +69,19 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const json = sub.toJSON()
     const authStore = useAuthStore()
 
-    await supabase.from('push_subscriptions').upsert({
+    const { error } = await supabase.from('push_subscriptions').upsert({
       user_id: authStore.user?.id,
       endpoint: sub.endpoint,
       p256dh: json.keys?.p256dh,
       auth: json.keys?.auth,
       user_agent: navigator.userAgent.slice(0, 200),
     }, { onConflict: 'endpoint' })
+
+    if (error) {
+      // Roll back the browser subscription so state stays consistent
+      await sub.unsubscribe()
+      throw new Error(error.message)
+    }
 
     subscribed.value = true
   }

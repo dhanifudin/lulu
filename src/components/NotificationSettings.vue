@@ -111,10 +111,17 @@ async function sendTest() {
       body: { type: 'test' },
     })
     if (error) throw error
-    const sent = (data as { sent?: number })?.sent ?? 0
-    testLabel.value = sent > 0
-      ? t('notifications.testSuccess')
-      : t('notifications.testNoSub')
+    const d = data as { sent?: number; subsFound?: number; pushErrors?: string[] }
+    const sent      = d?.sent      ?? 0
+    const subsFound = d?.subsFound ?? 0
+    if (d?.pushErrors?.length) console.error('[lulu] push errors:', d.pushErrors)
+    if (sent > 0) {
+      testLabel.value = t('notifications.testSuccess')
+    } else if (subsFound === 0) {
+      testLabel.value = t('notifications.testNoSub')
+    } else {
+      testLabel.value = t('notifications.testPushFailed')
+    }
   } catch {
     testLabel.value = t('notifications.testFail')
   } finally {
@@ -147,8 +154,17 @@ async function requestAndSubscribe() {
 }
 
 async function toggleSubscription() {
-  if (store.subscribed) await store.unsubscribe()
-  else await store.subscribe()
+  if (store.subscribed) {
+    await store.unsubscribe()
+  } else {
+    try {
+      await store.subscribe()
+    } catch (e) {
+      testLabel.value = t('notifications.testFail')
+      console.error('[lulu] subscribe error:', e)
+      setTimeout(() => { testLabel.value = t('notifications.testBtn') }, 4000)
+    }
+  }
 }
 
 async function save() {
