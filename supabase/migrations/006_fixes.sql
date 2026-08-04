@@ -7,6 +7,11 @@ UPDATE lulu.uniforms
 
 -- ── Rewards write policies (allow authenticated + allowed users to add custom rewards) ──
 -- SELECT already covered by existing "Public read" policy.
+-- DROP IF EXISTS makes this idempotent if policies were created manually before CI.
+
+DROP POLICY IF EXISTS "rewards_insert" ON lulu.rewards;
+DROP POLICY IF EXISTS "rewards_update" ON lulu.rewards;
+DROP POLICY IF EXISTS "rewards_delete" ON lulu.rewards;
 
 CREATE POLICY "rewards_insert"
   ON lulu.rewards FOR INSERT
