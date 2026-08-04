@@ -84,9 +84,19 @@ Deno.serve(async (req: Request) => {
       tag:   'lulu-test',
     })
 
-    const { data: subs } = await supabase
+    const { data: subs, error: queryError } = await supabase
       .from('push_subscriptions')
       .select('id, endpoint, p256dh, auth')
+
+    // Surface DB errors loudly — a swallowed "permission denied for schema
+    // lulu" (service_role missing grants) previously made this silently
+    // return subsFound:0 with no clue why.
+    if (queryError) {
+      return new Response(
+        JSON.stringify({ type: 'test', sent: 0, subsFound: 0, queryError: queryError.message }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } }
+      )
+    }
 
     const subsFound = subs?.length ?? 0
     const staleIds: string[] = []
